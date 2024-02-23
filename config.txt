@@ -1,0 +1,2 @@
+GEO_DIR: "C:\Users\benba\OneDrive\Desktop\Python GEO TAF"
+TAF_DIR: "C:\Users\benba\OneDrive\Desktop\Python GEO TAF"
