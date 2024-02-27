@@ -1,2 +1,3 @@
-GEO_DIR: "C:\Users\benba\OneDrive\Desktop\Python GEO TAF\GEO"
-TAF_DIR: "C:\Users\benba\OneDrive\Desktop\Python GEO TAF\JOB-TAF"
+GEO_DIR: "/Users/benb/Python for Engineers/Python GEO TAF/GEO"
+TAF_DIR: "/Users/benb/Python for Engineers/Python GEO TAF/JOB-TAF"
+BACKUP_DIR: "/Users/benb/Python for Engineers/Project 1/Backups"
