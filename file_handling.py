@@ -20,6 +20,8 @@ class ConfigManager:
         """Gets the GEO directory for the configuration"""
         config = self.load_config()
         matches = re.findall(r'GEO_DIR: "(.*)"', config)
+        
+        # Check if the line was found
         if not matches:
             raise ValueError("GEO_DIR configuration not found or is invalid in the configuration file.")
         print(f"GEO: {matches[0]}")
@@ -28,6 +30,8 @@ class ConfigManager:
         """Gets the TAF directory from the configuration"""
         config = self.load_config()
         matches = re.findall(r'TAF_DIR: "(.*)"', config)
+        
+        # Check if the line was found
         if not matches:
             raise ValueError("TAF_DIR configuration not found or is invalid in the configuration file.")
         print(f"TAF: {matches[0]}")
@@ -36,6 +40,8 @@ class ConfigManager:
         """Gets the backup directory from the configuration"""
         config = self.load_config()
         matches = re.findall(r'BACKUP_DIR: "(.*)"', config)
+        
+        # Check if the line was found
         if not matches:
             raise ValueError("BACKUP_DIR configuration not found or is invalid in the configuration file.")
         return matches[0]

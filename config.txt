@@ -1,3 +1,3 @@
-GEO_DIR: "/Users/benb/Python for Engineers/Python GEO TAF/GdEO"
-TAF_DIR: "/Users/benb/Python for Engineers/Python GEO TAF/TESdTTAF"
+GEO_DIR: "/Users/benb/Python for Engineers/Python GEO TAF/GEO"
+TAF_DIR: "/Users/benb/Python for Engineers/Python GEO TAF/TEST_TAFS"
 BACKUP_DIR: "/Users/benb/Python for Engineers/Project 1/Backups"
