@@ -1,0 +1,102 @@
+------------------------------------------------------------------------
+ |                                                                       |
+ | T e c h n o l o g y - P r o t o c o l                          V1.2   |
+ |                                                                       |
+------------------------------------------------------------------------
+File name
+=========
+
+        T:\Workfiles\User1\JOB-TAF\BCL002.TAF
+
+Processing Strategy
+=====================
+
+        MACHINING OF COMMON SLITTING CUTS
+
+Arrangement: SHEET
+=================
+
+  nested          :   15     produced     :   15     blocked      :    0
+  ----------------------------------------------------------------------
+
+
+                                                |       || Coupling by    
+  Part name                                     | Number || common cuts    
+  ----------------------------------------------------------------------
+  #~1                                           |       ||                
+  T:\Workfiles\User1\GEO\CAB-P1-0006-00_01.GEO  |     4 || TK_2           
+  namenlos                                      |     0 || TK_2           
+                                                |       ||                
+  T:\Workfiles\User1\GEO\CAB-P1-0029-00_01.GEO  |     2 || TK_1           
+  namenlos                                      |     0 || TK_1           
+                                                |       ||                
+  T:\Workfiles\User1\GEO\CAB-P1-0027-00_02.GEO  |     3 || -              
+                                                |       ||                
+  T:\Workfiles\User1\GEO\CAB-P1-0013-00_01.GEO  |     1 || -              
+                                                |       ||                
+  #~1END
+
+
+Arrangement: PARTS
+=================
+
+  Parts   || Parts        |                  || Parts        | Inhibit   
+  Number  || produced     | Rules            || blocked      | identific.
+  -----------------------------------------------------------------------
+  #~2     ||              |                  ||              |           
+        4 ||            1 |               1P ||            0 |          -
+        0 ||            1 |               1P ||            0 |          -
+     TK_2 ||            1 |               1P ||            0 |          -
+          ||              |                  ||              |           
+        2 ||            1 |               1P ||            0 |          -
+        0 ||            1 |               1P ||            0 |          -
+     TK_1 ||            1 |               1P ||            0 |          -
+          ||              |                  ||              |           
+        3 ||            2 |               1P ||            0 |          -
+        1 ||            3 |               1P ||            0 |          -
+  #~2END
+
+
+Arrangement: PARTS: CONTOURS
+===========================
+
+  Parts   || Contours        || Contours        | Inhibit   
+  Number  || produced        || blocked         | identific.
+  ----------------------------------------------------------
+          ||                 ||                 |           
+        4 ||              39 ||               0 |          -
+     TK_2 ||              13 ||               0 |          -
+          ||                 ||                 |           
+        2 ||               2 ||               0 |          -
+     TK_1 ||              16 ||               0 |          -
+          ||                 ||                 |           
+        3 ||              12 ||               0 |          -
+          ||                 ||                 |           
+        1 ||               3 ||               0 |          -
+          ||                 ||                 |           
+
+
+Arrangement: PARTS: MACHINING OF CONTOURS
+=======================================
+
+  Parts   || Measuring        Piercing       Fillet           Marking
+  Number  ||      |  Evaporating  |    Approach   |    Looping    |
+          ||      |       |       |       |       |       |       |
+  -----------------------------------------------------------------
+          ||
+        4 ||      0       0      39      39       0       0       0
+     TK_2 ||      0       0       1       1       0       0       0
+          ||
+        2 ||      0       0       2       2       0       0       0
+     TK_1 ||      0       0       1       1       0       0       0
+          ||
+        3 ||      0       0      12      12       0       0       0
+          ||
+        1 ||      0       0       3       3       0       0       0
+          ||
+
+
+Collisions
+===========
+
+  -----

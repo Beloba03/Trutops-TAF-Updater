@@ -44,6 +44,8 @@ It is recommended to test the program in an enclosed environment before deployin
 
 This section outlines various test cases and their expected outcomes, helping users to troubleshoot common issues they might encounter.
 
+For peer evaluation testing the files Example.TAF, Example2.TAF, and Example3.TAF (in the directory TEST_TAFS) have GEO files provided in the TEST_GEOS directory.
+
 ### Tested Scenarios
 
 1. **Missing Configuration File**
@@ -82,3 +84,7 @@ This section outlines various test cases and their expected outcomes, helping us
 - Verify that all paths specified in the `config.txt` file are correct and accessible.
 - Double-check the names and revisions of .GEO files to ensure they match your requirements before attempting to update .TAF files.
 - For any unexpected behavior or errors, reviewing the log files may provide additional insights into what went wrong.
+
+### Contact Info
+
+If you have any questions feel free to contact me at ben.babineau@dal.ca!

@@ -1,0 +1,75 @@
+------------------------------------------------------------------------
+ |                                                                       |
+ | T e c h n o l o g y - P r o t o c o l                          V1.2   |
+ |                                                                       |
+------------------------------------------------------------------------
+File name
+=========
+
+        T:\Workfiles\User1\JOB-TAF\CAB-P0-6041-00_A2-T1.TAF
+
+Processing Strategy
+=====================
+
+        MACHINING OF COMMON SLITTING CUTS
+
+Arrangement: SHEET
+=================
+
+  nested          :    6     produced     :    6     blocked      :    0
+  ----------------------------------------------------------------------
+
+
+                                                |       || Coupling by    
+  Part name                                     | Number || common cuts    
+  ----------------------------------------------------------------------
+  #~1                                           |       ||                
+  ...rkfiles\User1\GEO\CAB-P0-6041-00_A2-T1.GEO |     1 || TK_1           
+  namenlos                                      |     0 || TK_1           
+                                                |       ||                
+  #~1END
+
+
+Arrangement: PARTS
+=================
+
+  Parts   || Parts        |                  || Parts        | Inhibit   
+  Number  || produced     | Rules            || blocked      | identific.
+  -----------------------------------------------------------------------
+  #~2     ||              |                  ||              |           
+        1 ||            1 |               1P ||            0 |          -
+        0 ||            1 |               1P ||            0 |          -
+     TK_1 ||            1 |               1P ||            0 |          -
+          ||              |                  ||              |           
+  #~2END
+
+
+Arrangement: PARTS: CONTOURS
+===========================
+
+  Parts   || Contours        || Contours        | Inhibit   
+  Number  || produced        || blocked         | identific.
+  ----------------------------------------------------------
+          ||                 ||                 |           
+        1 ||               2 ||               0 |          -
+     TK_1 ||              16 ||               0 |          -
+          ||                 ||                 |           
+
+
+Arrangement: PARTS: MACHINING OF CONTOURS
+=======================================
+
+  Parts   || Measuring        Piercing       Fillet           Marking
+  Number  ||      |  Evaporating  |    Approach   |    Looping    |
+          ||      |       |       |       |       |       |       |
+  -----------------------------------------------------------------
+          ||
+        1 ||      0       0       2       2       0       0       0
+     TK_1 ||      0       0       1       1       0       0       0
+          ||
+
+
+Collisions
+===========
+
+  -----
