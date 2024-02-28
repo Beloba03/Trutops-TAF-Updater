@@ -7,7 +7,7 @@ This program automates the process of updating .TAF files used by Trumpf CNC las
 ## Project video
 
 The project video is accesible at the following link:
-[text](https://drive.google.com/file/d/1WFt3TDTAFl8Jq0j9CZuuLbqSYM-E8JTE/view?usp=sharing)
+https://drive.google.com/file/d/1WFt3TDTAFl8Jq0j9CZuuLbqSYM-E8JTE/view?usp=sharing
 
 ## Features
 
