@@ -36,7 +36,7 @@ def main():
             # The user is prompted to confirm they want to proceed with the modifications.
             if status:
                 # Run the update function again overiding the existance check if the user wants to continue
-                if input('The GEO does not exist, are you sure you wan\'t to update? (Y/N): ') == 'Y':
+                if input('The GEO does not exist, are you sure you wan\'t to update? (Y/N): ').upper() == 'Y':
                     file_manager.read_and_update_taf_files(part_number, new_revision, None, None, True)
                 else:
                     print("Finished without modifications.")
@@ -47,14 +47,14 @@ def main():
             
             # Run loop updating specific files until the user wants the end
             while cont:
-                taf_file = input('Enter the name of the TAF file:')
+                taf_file = input('Enter the name of the TAF file: ')
                 if not taf_file.lower().endswith('.taf'):
                     taf_file += '.TAF'
                 file_manager.read_and_update_taf_files(part_number, new_revision, [taf_file], "TAF_Temp")
                 if input('Would you like to update more TAFs? (Y/N): ').strip().upper() == 'N':
                     cont = False
         # Check if there are other files the user wants to update
-        if input('Would you like to change another GEO? (Y/N): ') == 'N':
+        if input('Would you like to change another GEO? (Y/N): ').upper() == 'N':
             mainLoop = False
 
 # Check the script is being run as the main file

@@ -114,18 +114,22 @@ class FileManager:
                 temp_write_path = file_path + '.tmp'  # Temporary file path
                 
                 # Open the taf file and temporary file
-                with open(file_path, 'r') as file, open(temp_write_path, 'w') as temp_file:
-                    print(f"Reading TAF file: {file_path}") # Print to console for debugging
-                    
-                    # Iterate over every line in the file
-                    for line in file:
-                        if re.search(geo_pattern, line):  # Find matches to the pattern
-                            old_ver = re.search(version_pattern, line).group(1)
-                            line = re.sub(version_pattern, f"_{replace_version}.", line)  # Replace the revision
-                            print("Found match")
-                            found_indicator = True
-                            
-                        temp_file.write(line)  # Write the line to the temporary file
+                try:
+                    with open(file_path, 'r') as file, open(temp_write_path, 'w') as temp_file:
+                        print(f"Reading TAF file: {file_path}") # Print to console for debugging
+                        
+                        # Iterate over every line in the file
+                        for line in file:
+                            if re.search(geo_pattern, line):  # Find matches to the pattern
+                                old_ver = re.search(version_pattern, line).group(1)
+                                line = re.sub(version_pattern, f"_{replace_version}.", line)  # Replace the revision
+                                print("Found match")
+                                found_indicator = True
+                                
+                            temp_file.write(line)  # Write the line to the temporary file
+                except FileNotFoundError:
+                    print("TAF file not found")
+                    return False
                 # Check if the file had any matches   
                 if found_indicator:
                     # Determine the final path for the updated file
