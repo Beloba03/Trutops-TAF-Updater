@@ -4,6 +4,11 @@
 
 This program automates the process of updating .TAF files used by Trumpf CNC laser cutters. These files contain a list of parts (stored in .GEO files) and their locations on a sheet of metal, known as a nest. When the name of a .GEO file changes due to part revisions, the associated .TAF files need to be updated to reflect these changes. This is a time-consuming manual process. This program aims to speed up the updating process, saving hours of manual work by automatically finding and updating the paths of .GEO files in .TAF files.
 
+## Project video
+
+The project video is accesible at the following link:
+[text](https://drive.google.com/file/d/1WFt3TDTAFl8Jq0j9CZuuLbqSYM-E8JTE/view?usp=sharing)
+
 ## Features
 
 - **Update all .TAF files** in a directory that contains a matching .GEO file based on the user's request.
