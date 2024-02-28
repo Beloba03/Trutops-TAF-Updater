@@ -68,7 +68,7 @@ For peer evaluation testing the files Example.TAF, Example2.TAF, and Example3.TA
    - **Test Case:** Specify a .GEO file in the update request that does not exist in the GEO directory.
    - **Expected Outcome:** Prompt: "The GEO does not exist, are you sure you want to update? (Y/N):"
 
-4. **Invalid GEO, and TAF Directories**
+4. **Invalid GEO and/or TAF Directory**
    
    - **Test Case:** Misconfigure the GEO directory path in `config.txt` to a non-existent location.
    - **Expected Outcome:** Error message: "The GEO directory /Users/benb/Python for Engineers/Python GEO TAF/GdEO was not found."
