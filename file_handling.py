@@ -2,6 +2,7 @@ import re
 import os
 import shutil
 import datetime
+
 class ConfigManager:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -39,7 +40,7 @@ class ConfigManager:
     def get_tmt_dir(self):
         """Gets the TAF directory from the configuration"""
         config = self.load_config()
-        matches = re.findall(r'TAF_DIR: "(.*)"', config)
+        matches = re.findall(r'TMT_DIR: "(.*)"', config)
         
         # Check if the line was found
         if not matches:
@@ -116,6 +117,7 @@ class FileManager:
         return False
     def read_and_update_taf_files(self, part_num, replace_version, taf_files = None, save_dir = None, override = False):
         """Reads each .TAF file, updates lines matching a pattern, and writes changes back."""
+        updated_taf_file_info = []
         if self.search_for_geo(part_num + '_' + replace_version + '.GEO') or override:
             part_num_escaped = re.escape(part_num)  # Convert any special characters to characters that are safe to use in regex pattern
             geo_pattern = rf"{part_num_escaped}_.*\.GEO"  # Pattern to match the GEO file name
@@ -163,13 +165,14 @@ class FileManager:
                     self.copy_tafs_to_backup(file_path) # Copy the unmodified files to a backup folder incase of accidental change
                     os.replace(temp_write_path, final_path) # Move the updated temporary file to the final path
                     self.write_change_log(taf_file, part_num, replace_version, old_ver) # Write the changed file to the log
+                    updated_taf_file_info.append((taf_file, part_num, replace_version, old_ver)) # Append the file to the list of updated files
                     
                 # Remove the temp file if it doesn't get changed from the original
                 else:
                     os.remove(temp_write_path)
-            return False
+            return [False, updated_taf_file_info]
         else:
-            return True
+            return [True, None]
                 
     def write_change_log(self, taf_file, part_num, revision, old_ver):
         """Writes an entry to the change log"""
@@ -177,3 +180,19 @@ class FileManager:
         with open(log_file_path, 'a') as log_file:
             timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             log_file.write(f"{timestamp} - 'Modified: {taf_file} - Part Number: {part_num} - New Revision: {revision} - Old Revision: {old_ver}'\n") # Writes the date, time, taf, part, and new revision to the log file
+    def get_all_parts(self, taf_name):
+        """Returns all parts in a provided TAF file"""
+        file_path = os.path.join(self.taf_dir, taf_name) # Combine the file with the file path in a system safe way
+        geo_pattern = re.compile(r"GEO\\(.*?)\.GEO")  # Pattern to get the GEO file name and revision
+        try:
+            with open(file_path, 'r') as file:
+                print(f"Reading TAF file: {file_path}") # Print to console for debugging
+                matches = []
+                for line in file:
+                    match = geo_pattern.search(line)
+                    if match:
+                        matches.append(match.group(1))
+                return matches
+        except FileNotFoundError:
+            print("TAF file not found")
+            return False
