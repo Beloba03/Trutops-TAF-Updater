@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox, scrolledtext
 from tkinter.simpledialog import askstring
 from file_handling import *
 from PDF_module import PdfSearcher
+from pdf_taf_checker import ComparePdfTaf
 
 # This function checks if an input if just a single number. If it is it adds a leading 0
 def check_for_single_number(input_number):
@@ -142,9 +143,11 @@ class FileUpdaterGUI:
         pdf_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
         if not pdf_path:
             return  # User cancelled the dialog
+        print(f"pdf_path: {pdf_path}")
 
-        # Dummy data for demonstration
-        comparison_results = [('1234A', True), ('5678B', False, 'A', 'B'), ('5678asB', False, 'A', 'B'), ('56de78B', False, 'A', 'B')]
+        comparer = ComparePdfTaf(pdf_path, self.file_manager)
+        comparison_results = comparer.compare_pdf_taf()
+        print(f"comparison_results: {comparison_results}")
 
         # Display results
         self.display_comparison_results(comparison_results)

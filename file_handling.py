@@ -183,7 +183,7 @@ class FileManager:
     def get_all_parts(self, taf_name):
         """Returns all parts in a provided TAF file"""
         file_path = os.path.join(self.taf_dir, taf_name) # Combine the file with the file path in a system safe way
-        geo_pattern = re.compile(r"GEO\\(.*?)\.GEO")  # Pattern to get the GEO file name and revision
+        geo_pattern = re.compile(r"GEO\\(.*?)\.GEO")  # Pattern to get the part number
         try:
             with open(file_path, 'r') as file:
                 print(f"Reading TAF file: {file_path}") # Print to console for debugging

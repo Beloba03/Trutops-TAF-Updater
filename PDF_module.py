@@ -6,7 +6,8 @@ import fitz  # Import the PyMuPDF library
 
 class PdfSearcher:
     def __init__(self, search_string, directory):
-        self.search_string = re.sub(r'\s+', '', search_string)  # Remove all whitespace for the search
+        if search_string is not None:
+            self.search_string = re.sub(r'\s+', '', search_string)  # Remove all whitespace for the search
         self.directory = directory
 
     def search_pdf(self, file_path, all_parts=False):
@@ -14,9 +15,9 @@ class PdfSearcher:
         print(f"Searching through: {file_path}")
         
         if all_parts:
-            search_pattern = re.compile(r"GEO\\(.*?)\.GEO")
+            search_pattern = r"GEO\\(.*?)\.GEO"
         else:
-            search_pattern = f"GEO\\\\.*?{self.search_string}.*?\\.GEO"
+            search_pattern = rf"GEO\\.*?{self.search_string}.*?\.GEO"
         pattern = re.compile(search_pattern, flags=re.IGNORECASE | re.DOTALL)
         
         try:
@@ -26,10 +27,12 @@ class PdfSearcher:
                 text = page.get_text()
                 if text:
                     text = re.sub(r'\s+', '', text)
+                    print(text)
                     
                     # Return list of all parts in TAF file (PDF-TAF compare tab)
                     if all_parts:
                         matches = pattern.findall(text)
+                        print(f"Matches: {matches}")
                         return matches
                     
                     # Return filepath of taf with matching part (PDF search tab)
