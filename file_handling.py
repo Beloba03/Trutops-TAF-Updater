@@ -36,6 +36,16 @@ class ConfigManager:
             raise ValueError("TAF_DIR configuration not found or is invalid in the configuration file.")
         print(f"TAF: {matches[0]}")
         return matches[0]
+    def get_tmt_dir(self):
+        """Gets the TAF directory from the configuration"""
+        config = self.load_config()
+        matches = re.findall(r'TAF_DIR: "(.*)"', config)
+        
+        # Check if the line was found
+        if not matches:
+            raise ValueError("TAF_DIR configuration not found or is invalid in the configuration file.")
+        print(f"TAF: {matches[0]}")
+        return matches[0]
     def get_backup_dir(self):
         """Gets the backup directory from the configuration"""
         config = self.load_config()
@@ -45,6 +55,12 @@ class ConfigManager:
         if not matches:
             raise ValueError("BACKUP_DIR configuration not found or is invalid in the configuration file.")
         return matches[0]
+    def return_TAF_dir(self):
+        """Returns the TAF directory"""
+        return self.get_taf_dir()
+    def return_TMT_dir(self):
+        """Returns the TMT directory"""
+        return self.get_tmt_dir()
     
 class FileManager:
     def __init__(self, taf_dir, geo_dir, backup_base_dir):
