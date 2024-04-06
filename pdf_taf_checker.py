@@ -14,7 +14,10 @@ class ComparePdfTaf():
         # Pattern to match filename to replace extension
         pattern = r".*[/\\](.*)\.[^.]+$"
         taf_name = re.sub(pattern, r"\1.taf", self.pdf_path)
-        self.taf_parts = self.taf_manager.get_all_parts(taf_name)   
+        self.taf_parts = self.taf_manager.get_all_parts(taf_name)
+        
+        if self.taf_parts is False:
+               return False
         
         # PdfSearcher doesn't require search string because it is looking for all matches to internal regex pattern
         searcher = PdfSearcher(None, self.pdf_path)

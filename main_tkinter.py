@@ -206,6 +206,9 @@ class FileUpdaterGUI:
 
         comparer = ComparePdfTaf(pdf_path, self.file_manager)
         comparison_results = comparer.compare_pdf_taf()
+        if comparison_results is False:
+            messagebox.showerror("Error", "TAF File not Found!")
+            return
         print(f"comparison_results: {comparison_results}")
 
         self.display_comparison_results(comparison_results)
