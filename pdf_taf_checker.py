@@ -1,4 +1,3 @@
-from file_handling import FileManager
 from PDF_module import PdfSearcher
 import re
 
@@ -41,12 +40,16 @@ class ComparePdfTaf():
                     pdf_before_underscore = pdf_split[0]
                     pdf_after_underscore = "Missing Revision"
                 # Check if the parts before the underscore match
-                is_match = taf_before_underscore == pdf_before_underscore
+                processed_taf = taf_before_underscore.replace(" ", "").lower()
+                processed_pdf = pdf_before_underscore.replace(" ", "").lower()
+                is_match = processed_taf == processed_pdf
                 if is_match:
                     is_match = taf_after_underscore == pdf_after_underscore # Check if the parts after the underscore match
                     print(f"TAF After _: {taf_after_underscore}, PDF After _: {pdf_after_underscore}")
                     break # Found a match
-
+            if not is_match:
+                taf_before_underscore = "Missing TAF"
+                taf_after_underscore = " "
             # Store the comparison result along with parts before and after the underscore
             comparison_results.append((taf_part, is_match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore))
 

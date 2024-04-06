@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
-from tkinter.simpledialog import askstring
 from file_handling import *
 from PDF_module import PdfSearcher
 from pdf_taf_checker import ComparePdfTaf
@@ -13,18 +12,22 @@ def check_for_single_number(input_number):
         return input_number
     
 class FileUpdaterGUI:
+    """This is the GUI class for the file management application. It contains the setup for the window,tabs and the methods for the GUI features."""
     def __init__(self, root):
+        """Assign the initialization variables and call the setup_gui method."""
         self.root = root
-        self.config_manager = ConfigManager('config.txt')
+        self.config_manager = ConfigManager('config.txt') # Open the config.txt file with the ConfigManager class
         self.geo_dir = self.config_manager.get_geo_dir()
         self.taf_dir = self.config_manager.get_taf_dir()
         self.backup_dir = self.config_manager.get_backup_dir()
-        self.tmt_dir = self.config_manager.get_tmt_dir()  # Assuming get_TMT_dir method exists in ConfigManager
-        self.file_manager = FileManager(self.taf_dir, self.geo_dir, self.backup_dir)
-        self.setup_gui()
+        self.tmt_dir = self.config_manager.get_tmt_dir() 
+        self.file_manager = FileManager(self.taf_dir, self.geo_dir, self.backup_dir) # Create a new FileManager instance using the directories from the config
+        self.setup_gui() # Call the window setup method
     
     def setup_gui(self):
-        self.root.title("File Management")
+        """Setup the main window and the tabs for the application."""
+        # Setup the main window
+        self.root.title("Laser File Management")
         self.root.geometry("1200x700")
         self.root.minsize(600, 400)
 
@@ -34,122 +37,195 @@ class FileUpdaterGUI:
         self.tab_tmt_checker = ttk.Frame(self.notebook)
         self.tab_comparison = ttk.Frame(self.notebook)
         
+        # Add the tabs to the Tkinter notebook and name them
         self.notebook.add(self.tab_taf_updater, text="TAF Revision Updater")
         self.notebook.add(self.tab_tmt_checker, text="TMT Part Searcher")
         self.notebook.add(self.tab_comparison, text="PDF-TAF Comparison")
-        self.notebook.pack(expand=True, fill="both")
+        self.notebook.pack(expand=True, fill="both") # Fit the notebook to the whole window
 
+        # Setup the individual tabs
         self.setup_taf_updater_tab()
         self.setup_tmt_checker_tab()
         self.setup_comparison_tab()
 
     def setup_taf_updater_tab(self):
+        """Setup all the fields in the TAF tab"""
         # Use an inner frame to hold the fixed-size elements (input fields, labels, buttons)
         input_frame = ttk.Frame(self.tab_taf_updater)
         input_frame.grid(row=0, column=0, sticky="ew")
 
-        # Configure the tab's column to expand, allowing the inner frame to stay centered
+        # Configure the tab's column to expand with the window
         self.tab_taf_updater.grid_columnconfigure(0, weight=1)
 
-        # Input for part number
-        tk.Label(input_frame, text="Part Number:", font=("Arial", 12)).grid(row=0, column=0, padx=10, pady=10)
-        self.part_number_entry = tk.Entry(input_frame, font=("Arial", 12), width=30)
-        self.part_number_entry.grid(row=0, column=1, padx=10, pady=10)
+        # Input field for part number
+        tk.Label(input_frame, text="Part Number:", font=("Arial", 12)).grid(row=0, column=0, padx=10, pady=10) # Label for above text box
+        self.part_number_entry = tk.Entry(input_frame, font=("Arial", 12), width=30) # Text box for the part number
+        self.part_number_entry.grid(row=0, column=1, padx=10, pady=10) # Place the text box in the window in column 1 (beside the label)
 
-        # Input for new revision
+        # Input field for new revision
         tk.Label(input_frame, text="New Revision:", font=("Arial", 12)).grid(row=1, column=0, padx=10, pady=10)
         self.new_revision_entry = tk.Entry(input_frame, font=("Arial", 12), width=30)
         self.new_revision_entry.grid(row=1, column=1, padx=10, pady=10)
 
         # Buttons for selecting update mode
-        tk.Button(input_frame, text="Update Directory", command=self.update_directory, font=("Arial", 12), width=20).grid(row=2, column=0, padx=10, pady=30)
-        tk.Button(input_frame, text="Select TAF Files", command=self.update_specific_files, font=("Arial", 12), width=20).grid(row=2, column=1, padx=10, pady=30)
+        tk.Button(input_frame, text="Update Whole Directory", command=self.update_directory, font=("Arial", 12), width=20).grid(row=2, column=0, padx=10, pady=30)
+        tk.Button(input_frame, text="Update Specific TAFs", command=self.update_specific_files, font=("Arial", 12), width=20).grid(row=2, column=1, padx=10, pady=30)
 
-        # Scrollable Debug Display for updated files information
-        self.debug_display = scrolledtext.ScrolledText(self.tab_taf_updater, font=("Arial", 10), height=8)
+        # Output text field
+        self.debug_display = scrolledtext.ScrolledText(self.tab_taf_updater, font=("Arial", 10), height=8) # Place at bottom in of screen. Will resize with the window.
         self.debug_display.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
-        # Make the scrollable area expand with the window
+        # Set the scrollable area height to expand with the window
         self.tab_taf_updater.grid_rowconfigure(1, weight=1)
 
     def update_directory(self):
+        """Calls read_and_update_taf_files and prompts user with message box if GEO file doesn't exist. Updates entire TAF directory."""
+        
+        # Get the input from the fields
         part_number = self.part_number_entry.get()
+        
+        # Ensure part number is not empty. If it is this will erase all part numbers in the directory. Files can be recovered from the backup directory if this occurs.
+        if part_number == "":
+            messagebox.showwarning("Warning", "Please provide a valid part number")
+            return
+        
+        # Allowing black revisions to be entered. Won't hurt anything and might be useful?
         new_revision = check_for_single_number(self.new_revision_entry.get())
+        
+        # Call the read_and_update_taf_files method with the input. Status will return True if the GEO doesn't exist.
         status, updated_files = self.file_manager.read_and_update_taf_files(part_number, new_revision, None)
+        
+        # Prompt the user with a message box if the GEO doesn't exist
         if status:
             if messagebox.askyesno("Confirm Update", "The GEO does not exist. Are you sure you want to update?"):
                 _, updated_files = self.file_manager.read_and_update_taf_files(part_number, new_revision, None, None, True)
+                messagebox.showinfo("Finished", "Successfully updated directory!")
         else:
-            messagebox.showinfo("Update Cancelled", "Finished without modifications.")
+            messagebox.showinfo("Finished", "Successfully updated directory!")
         
-        # Display updated files in the debug display
+        # Display updated files in the output display
         self.display_updated_files(updated_files)
 
     def update_specific_files(self):
+        """Calls read_and_update_taf_files and prompts user with message box if GEO file doesn't exist. Updates specific TAF files."""
+        
+        # Get the input from the fields
         part_number = self.part_number_entry.get()
         new_revision = check_for_single_number(self.new_revision_entry.get())
+        
+        # Get the desired files from a file ask window.
         files = filedialog.askopenfilenames(title="Select TAF files", initialdir=self.taf_dir, filetypes=(("TAF files", "*.taf"), ("All files", "*.*")))
 
         if files:  # Proceed only if files were selected
-            # Process all selected files as a batch
+            
+            # Call the read_and_update_taf_files method with the input. Status will return True if the GEO doesn't exist. Files passed in as a list.
             status, updated_files = self.file_manager.read_and_update_taf_files(part_number, new_revision, files, "TAF_Temp")
             
+            # Prompt the user with a message box if the GEO doesn't exist
             if status:
                 if messagebox.askyesno("Confirm Update", "The GEO does not exist. Are you sure you want to update?"):
                     _, updated_files = self.file_manager.read_and_update_taf_files(part_number, new_revision, files, "TAF_Temp", True)
+                    messagebox.showinfo("Finished", "Successfully updated directory!")
                 else:
-                    messagebox.showinfo("Update Cancelled", "Finished without modifications.")
+                    messagebox.showinfo("Finished", "Successfully updated directory!")
             
-            # Display updated files in the debug display
+            # Display updated files in the output display
             self.display_updated_files(updated_files)
             
     def display_updated_files(self, updated_files):
-        self.debug_display.delete(1.0, tk.END)  # Clear previous content
+        """Display updated files in the output display. If no files were updated, display a message."""
+        self.debug_display.delete(1.0, tk.END)  # Clear display first
+        
+        # Check files were updated
         if updated_files:
+            # Insert updated files into the output display after all previous text
             for file_info in updated_files:
                 self.debug_display.insert(tk.END, f"Updated: {file_info[0]} - Part: {file_info[1]}, Old Ver: {file_info[3]}, New Ver: {file_info[2]}\n")
         else:
             self.debug_display.insert(tk.END, "No files were updated.\n")
              
     def setup_tmt_checker_tab(self):
-        # Setup for TMT-TAF Revision Checker tab
-        self.search_string_var = tk.StringVar()
+        """Setup for TMT-TAF Revision Checker tab"""
+        
+        # Setup the search section with a label and input field. These use the packed window layout for simplicity.
         tk.Label(self.tab_tmt_checker, text="Search String:", font=("Arial", 12)).pack(pady=10)
-        self.search_string_entry = tk.Entry(self.tab_tmt_checker, font=("Arial", 12), textvariable=self.search_string_var)
+        self.search_string_entry = tk.Entry(self.tab_tmt_checker, font=("Arial", 12))
         self.search_string_entry.pack(pady=10)
+        
+        # Create the search button
         tk.Button(self.tab_tmt_checker, text="Search PDFs", command=self.start_pdf_search, font=("Arial", 12)).pack(pady=10)
+        
+        # Create the output display
         self.search_results = scrolledtext.ScrolledText(self.tab_tmt_checker, font=("Arial", 12), height=10)
         self.search_results.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def start_pdf_search(self):
-        search_string = self.search_string_var.get()
+        """Searches through the PDF files in the TMT directory for the search string provided by the user."""
+        
+        # Get the search string from the input field
+        search_string = self.search_string_entry.get()
+        
+        # Check string actually exists
         if search_string:
-            self.search_results.delete(1.0, tk.END)
+            self.search_results.delete(1.0, tk.END) # Clear output field
             searcher = PdfSearcher(search_string, self.tmt_dir)  # Use the directory from config manager. Has to be created each time because of the multi-cored search
-            searcher.search_in_directory(self.update_search_results)
+            searcher.search_in_directory(self.update_search_results) # Call search in directory with callback to update the output field. This is done using multiprocessing (multicore) to speed up the search.
         else:
             messagebox.showwarning("Warning", "Please provide a search string.")
+            
     def update_search_results(self, result):
-        self.search_results.insert(tk.END, f"Match found in file: {result}\n")
+        """Add result to search results display. This is a callback function for the search_in_directory method."""
+        self.search_results.insert(tk.END, f"Match found in file: {result}\n") # Insert onto end of display
         self.search_results.yview(tk.END)
         
         
     def setup_comparison_tab(self):
-        # Splitting the tab into left (for PDF selection) and right (for comparison results) frames
+        """Setup for PDF-TAF Comparison tab. This tab will allow the user to select a PDF file and compare it to the TAF files."""
+        # Splitting the tab into left (for PDF selection) and right (for description) frames
         self.left_frame = ttk.Frame(self.tab_comparison)
         self.left_frame.pack(side="left", fill="both", expand=True)
+        self.right_frame = ttk.Frame(self.tab_comparison)
+        self.right_frame.pack(side="right", fill="both", expand=True)
+        
+        # RHS text box
+        self.side_text = tk.Label(self.right_frame,\
+            text="This is intended to function with standard part numbers of the form:\"XXX-XXXX-XX_XX\"\nFunctionality with other naming conventions can not be guaranteed (though it will work for most)!\n\n\n\nClick on a PDF file and the parts inside will appear to the right.\nIf the parts are the same revision in both the PDF and TAF file it will show as GREEN.\nIf there is no associated revision it will show as YELLOW. These should be manually checked.\nIf it shows as RED the revision is different in the PDF vs TAF. Both revisions will be shown in the RED box.",\
+            font=("Arial", 12))
+        self.side_text.pack(fill="both", expand=True)
+        
+        # Bind the frame resize event so the RHS text can be resized (might help readability)
+        self.right_frame.bind('<Configure>', self.update_label_wrap)
+
+        # Setup the PDF and results lists
         self.setup_scrollable_pdf_list()
         self.populate_pdf_list()  # Populate the left frame with PDFs
         self.setup_scrollable_results_frame()
+
+    
+    def update_label_wrap(self, event):
+        """Event handler for resizing the right frame. This will adjust the wrap length of the label to match the RHS frame width."""
+        # Set the wraplength of the label to the current width of the frame
+        self.side_text.configure(wraplength=self.right_frame.winfo_width())
+
     def setup_scrollable_pdf_list(self):
         # Create a canvas within the left_frame with a fixed width of 300 pixels
         self.pdf_list_canvas = tk.Canvas(self.left_frame, width=300)
         self.pdf_list_scrollbar = ttk.Scrollbar(self.left_frame, orient="vertical", command=self.pdf_list_canvas.yview)
-        top_text = tk.Label(self.left_frame,\
-            text="Click on a PDF file and the parts inside will appear to the right.\nIf the parts are the same revision in both the PDF and TAF file it will show as GREEN.\nIf there is no associated revision it will show as YELLOW. These should be manually checked.\nIf it shows as RED the revision is different in the PDF vs TAF. Both revisions will be shown in the RED box.", font=("Arial", 12))
-        top_text.pack(side="top")
         pdf_text = tk.Label(self.left_frame, text="Select PDF File:                                     Results:", font=("Arial", 14, "bold"), pady=5)
         pdf_text.pack(side="top", anchor="w")
+        
+        # Create a container frame for the search entry to control its pixel width
+        search_container = tk.Frame(self.left_frame, width=300, height=75)
+        search_container.pack_propagate(False)  # Prevent the frame from resizing to fit its contents
+        search_container.pack(side="top", padx=10, anchor="w")
+
+        # Add a search label and entry above the PDF list for clarity
+        search_label = tk.Label(search_container, text="Search PDFs:", font=("Arial", 10, "bold"))
+        search_label.pack(side="top", padx=10, pady=5)
+
+        self.search_entry = tk.Entry(search_container, font=("Arial", 12))
+        self.search_entry.pack(fill="x", expand=True)
+        self.search_entry.bind("<KeyRelease>", lambda event: self.filter_pdf_list())
         
         # Configure the canvas to use the scrollbar
         self.pdf_list_canvas.configure(yscrollcommand=self.pdf_list_scrollbar.set)
@@ -165,10 +241,17 @@ class FileUpdaterGUI:
         # Ensure the canvas' scrollregion is updated when the inner frame changes size
         self.pdf_list_frame.bind("<Configure>", lambda e: self.pdf_list_canvas.configure(scrollregion=self.pdf_list_canvas.bbox("all")))
 
-        # Thanks to Mikhail T. at https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar for this solution to bind to the current active widget!
+        # Thanks to Mikhail T. at https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar for this solution to bind to the current active widget for scrolling!
         self.pdf_list_frame.bind('<Enter>', lambda event, canvas=self.pdf_list_canvas: self.bound_to_mousewheel(event, canvas))
         self.pdf_list_frame.bind('<Leave>', lambda event, canvas=self.pdf_list_canvas: self.unbound_to_mousewheel(event, canvas))
-        
+    def filter_pdf_list(self):
+        query = self.search_entry.get().lower()
+        for widget in self.pdf_list_frame.winfo_children():
+            if query in widget.cget("text").lower():
+                widget.pack(fill="x", padx=5, pady=2)
+            else:
+                widget.pack_forget()
+
     def bound_to_mousewheel(self, event, passed_canvas):
         # Bind the mouse wheel scroll event to the canvas
         passed_canvas.bind_all("<MouseWheel>", lambda event, canvas=passed_canvas: self.on_mousewheel(event, canvas))
@@ -229,7 +312,10 @@ class FileUpdaterGUI:
                 text = f"{part_number}\nTAF & PDF Missing Revision"
             else:
                 bg_color = "red"
-                text = f"{part_number}\nPDF: {result[2]}_{pdf_after_underscore}, TAF: {result[3]}_{taf_after_underscore}"
+                if result[2] != "Missing TAF":
+                    text = f"{part_number}\nPDF: {result[3]}_{pdf_after_underscore}, TAF: {result[2]}_{taf_after_underscore}"
+                else:
+                    text = f"{part_number}\nPDF: {result[3]}_{pdf_after_underscore}, TAF: {result[2]}"
 
             label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white", padx=5, pady=5)
             label.pack(fill="both", padx=5, pady=5)

@@ -28,7 +28,6 @@ class PdfSearcher:
                 text = page.get_text()
                 if text:
                     text = re.sub(r'\s+', '', text)
-                    print(text)
                     
                     # Return list of all parts in TAF file (PDF-TAF compare tab)
                     if all_parts:

@@ -73,9 +73,6 @@ class FileManager:
         if not os.path.exists(self.backup_base_dir):
             os.makedirs(self.backup_base_dir)
         
-        # Creates a new backup directory 1 number higher than the last
-        self.current_backup_dir = self.create_backup_dir()
-        
         try:
             self.geo_list = [file for file in os.listdir(self.geo_dir) if file.endswith('.GEO')] # Get the list of GEO files (only needs to run once at init to save time)
         except FileNotFoundError:
@@ -117,6 +114,11 @@ class FileManager:
         return False
     def read_and_update_taf_files(self, part_num, replace_version, taf_files = None, save_dir = None, override = False):
         """Reads each .TAF file, updates lines matching a pattern, and writes changes back."""
+        
+        # Create backup directory 1 number higher than previous. Don't call on override as dir should already exist
+        if not override:
+            self.current_backup_dir = self.create_backup_dir()
+        
         updated_taf_file_info = []
         if self.search_for_geo(part_num + '_' + replace_version + '.GEO') or override:
             part_num_escaped = re.escape(part_num)  # Convert any special characters to characters that are safe to use in regex pattern
@@ -130,7 +132,9 @@ class FileManager:
             if save_dir is None:
                 save_dir = self.taf_dir
 
-            version_pattern = r"_(.*?)\."
+            # Gets the version number from the file name. The part after the last _ is the version number.
+            version_pattern = r"_([^_]*)\."
+            
             # Iterate through all the files in the taf_files list
             for taf_file in taf_files:
                 found_indicator = False  # Indicator for whether the TAF was changed
@@ -153,7 +157,7 @@ class FileManager:
                             temp_file.write(line)  # Write the line to the temporary file
                 except FileNotFoundError:
                     print("TAF file not found")
-                    return False
+                    return False, None
                 # Check if the file had any matches   
                 if found_indicator:
                     # Determine the final path for the updated file
