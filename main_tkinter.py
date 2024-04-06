@@ -162,21 +162,19 @@ class FileUpdaterGUI:
         self.results_frame.grid_columnconfigure(1, minsize=300)
         self.results_frame.grid_columnconfigure(2, weight=1)
         for idx, result in enumerate(results):
-            part_number, match = result[0], result[1]
-            if match:
+            part_number, match, taf_after_underscore, pdf_after_underscore = result[0], result[1], result[4], result[5]
+            if match and taf_after_underscore != "Missing Revision" and pdf_after_underscore != "Missing Revision":
                 bg_color = "green"
                 text = part_number
+            elif taf_after_underscore == "Missing Revision" and pdf_after_underscore == "Missing Revision":
+                bg_color = "orange"
+                text = f"{part_number}\nTAF & PDF Missing Revision"
             else:
                 bg_color = "red"
-                text = f"{part_number}\nPDF: {result[2]}, TAF: {result[3]}"
+                text = f"{part_number}\nTAF: {result[2]}_{pdf_after_underscore}, PDF: {result[3]}_{taf_after_underscore}"
 
             label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white")
-            label.grid(row=idx, column=1, padx=15, pady=10, sticky="ew")
-        # If there are no results, configure the middle column to take up the space
-        if not results:
-            self.results_frame.grid_rowconfigure(0, weight=1)
-        # Ensure the labels stay centered vertically within the middle column
-        self.results_frame.grid_rowconfigure(len(results), weight=1)
+            label.grid(row=idx, column=1, padx=15, pady=10, sticky="nsew")
 
 def main():
     root = tk.Tk()

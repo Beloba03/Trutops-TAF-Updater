@@ -16,6 +16,7 @@ class PdfSearcher:
         
         if all_parts:
             search_pattern = r"GEO\\(.*?)\.GEO"
+            match_list = []
         else:
             search_pattern = rf"GEO\\.*?{self.search_string}.*?\.GEO"
         pattern = re.compile(search_pattern, flags=re.IGNORECASE | re.DOTALL)
@@ -33,7 +34,7 @@ class PdfSearcher:
                     if all_parts:
                         matches = pattern.findall(text)
                         print(f"Matches: {matches}")
-                        return matches
+                        match_list.extend(matches)
                     
                     # Return filepath of taf with matching part (PDF search tab)
                     else:
@@ -41,11 +42,16 @@ class PdfSearcher:
                             print(f"Match found in: {file_path}")
                             doc.close()
                             return file_path
+            if all_parts:
+                print(f"Match List: {match_list}")
+                doc.close()
+                return match_list
             # Print a message if no match is found in the current PDF
             print(f"No match found in: {file_path}")
             doc.close()
         except Exception as e:
             print(f"Error processing {file_path}: {e}")
+
         return None
 
     def search_in_directory(self, update_callback):

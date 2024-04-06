@@ -19,4 +19,7 @@ if __name__ == "__main__":
 
     file_path = sys.argv[1]
     pdf_text = read_pdf(file_path)
-    print(pdf_text)
+    
+    # Output to file
+    with open("output.txt", "w") as file:
+        file.write(pdf_text)

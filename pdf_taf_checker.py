@@ -22,19 +22,29 @@ class ComparePdfTaf():
         
 
         for taf_part in self.taf_parts:
-            taf_split = taf_part.split('_', 1)  # Split at the first underscore
+            taf_split = taf_part.rsplit('_', 1)  # Split at the first underscore from the right
+            print(f"TAF Split: {taf_split}")
             if len(taf_split) == 2:
                 taf_before_underscore, taf_after_underscore = taf_split  # Separate into before and after underscore
+            else:
+                taf_before_underscore = taf_split[0]
+                taf_after_underscore = "Missing Revision"
 
-                for pdf_part in self.pdf_parts:
-                    pdf_split = pdf_part.split('_', 1)  # Split at the first underscore
-                    if len(pdf_split) == 2:
-                        pdf_before_underscore, pdf_after_underscore = pdf_split  # Separate into before and after underscore
+            for pdf_part in self.pdf_parts:
+                pdf_split = pdf_part.rsplit('_', 1)  # Split at the first underscore from the right
+                if len(pdf_split) == 2:
+                    pdf_before_underscore, pdf_after_underscore = pdf_split  # Separate into before and after underscore
+                else:
+                    pdf_before_underscore = pdf_split[0]
+                    pdf_after_underscore = "Missing Revision"
+                # Check if the parts before the underscore match
+                is_match = taf_before_underscore == pdf_before_underscore
+                if is_match:
+                    is_match = taf_after_underscore == pdf_after_underscore # Check if the parts after the underscore match
+                    print(f"TAF After _: {taf_after_underscore}, PDF After _: {pdf_after_underscore}")
+                    break # Found a match
 
-                        # Check if the parts before the underscore match
-                        is_match = taf_before_underscore == pdf_before_underscore
-
-                        # Store the comparison result along with parts before and after the underscore
-                        comparison_results.append((taf_part, is_match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore))
+            # Store the comparison result along with parts before and after the underscore
+            comparison_results.append((taf_part, is_match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore))
 
         return comparison_results
