@@ -15,13 +15,13 @@ def check_for_single_number(input_number):
 class FileUpdaterGUI:
     def __init__(self, root):
         self.root = root
-        self.setup_gui()
         self.config_manager = ConfigManager('config.txt')
         self.geo_dir = self.config_manager.get_geo_dir()
         self.taf_dir = self.config_manager.get_taf_dir()
         self.backup_dir = self.config_manager.get_backup_dir()
         self.tmt_dir = self.config_manager.get_tmt_dir()  # Assuming get_TMT_dir method exists in ConfigManager
         self.file_manager = FileManager(self.taf_dir, self.geo_dir, self.backup_dir)
+        self.setup_gui()
     
     def setup_gui(self):
         self.root.title("File Management")
@@ -135,32 +135,87 @@ class FileUpdaterGUI:
         
         
     def setup_comparison_tab(self):
-        tk.Button(self.tab_comparison, text="Select PDF", command=self.select_pdf).pack(pady=20)
-        self.results_frame = ttk.Frame(self.tab_comparison)
-        self.results_frame.pack(fill="both", expand=True)
+        # Splitting the tab into left (for PDF selection) and right (for comparison results) frames
+        self.left_frame = ttk.Frame(self.tab_comparison)
+        self.left_frame.pack(side="left", fill="both", expand=True)
+        self.setup_scrollable_pdf_list()
+        self.populate_pdf_list()  # Populate the left frame with PDFs
+        self.setup_scrollable_results_frame()
+    def setup_scrollable_pdf_list(self):
+        # Create a canvas within the left_frame with a fixed width of 300 pixels
+        self.pdf_list_canvas = tk.Canvas(self.left_frame, width=300)
+        self.pdf_list_scrollbar = ttk.Scrollbar(self.left_frame, orient="vertical", command=self.pdf_list_canvas.yview)
+        top_text = tk.Label(self.left_frame,\
+            text="Click on a PDF file and the parts inside will appear to the right.\nIf the parts are the same revision in both the PDF and TAF file it will show as GREEN.\nIf there is no associated revision it will show as YELLOW. These should be manually checked.\nIf it shows as RED the revision is different in the PDF vs TAF. Both revisions will be shown in the RED box.", font=("Arial", 12))
+        top_text.pack(side="top")
+        pdf_text = tk.Label(self.left_frame, text="Select PDF File:                                     Results:", font=("Arial", 14, "bold"), pady=5)
+        pdf_text.pack(side="top", anchor="w")
+        
+        # Configure the canvas to use the scrollbar
+        self.pdf_list_canvas.configure(yscrollcommand=self.pdf_list_scrollbar.set)
+        
+        # Pack the canvas and the scrollbar closely together
+        self.pdf_list_canvas.pack(side="left", fill="y", expand=False)  # Changed fill to "y" to fill vertically only
+        self.pdf_list_scrollbar.pack(side="left", fill="y")  # Adjusted to fill "y" to match the canvas
+        
+        # Create an inner frame to hold the PDF buttons
+        self.pdf_list_frame = ttk.Frame(self.pdf_list_canvas)
+        self.pdf_list_canvas.create_window((0, 0), window=self.pdf_list_frame, anchor="nw", width=300)  # Set width of the window
+        
+        # Ensure the canvas' scrollregion is updated when the inner frame changes size
+        self.pdf_list_frame.bind("<Configure>", lambda e: self.pdf_list_canvas.configure(scrollregion=self.pdf_list_canvas.bbox("all")))
 
-    def select_pdf(self):
-        pdf_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
-        if not pdf_path:
-            return  # User cancelled the dialog
+        # Thanks to Mikhail T. at https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar for this solution to bind to the current active widget!
+        self.pdf_list_frame.bind('<Enter>', lambda event, canvas=self.pdf_list_canvas: self.bound_to_mousewheel(event, canvas))
+        self.pdf_list_frame.bind('<Leave>', lambda event, canvas=self.pdf_list_canvas: self.unbound_to_mousewheel(event, canvas))
+        
+    def bound_to_mousewheel(self, event, passed_canvas):
+        # Bind the mouse wheel scroll event to the canvas
+        passed_canvas.bind_all("<MouseWheel>", lambda event, canvas=passed_canvas: self.on_mousewheel(event, canvas))
+
+    def unbound_to_mousewheel(self, event, passed_canvas):
+        # Unbind the mouse wheel scroll event from the bound canvas and bind back to results
+        passed_canvas.bind_all("<MouseWheel>", lambda event, canvas=self.canvas: self.on_mousewheel(event, canvas))
+
+    def on_mousewheel(self, event, canvas, amount=None):
+        """Scroll the canvas with the mouse wheel."""
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    def setup_scrollable_results_frame(self):
+        self.canvas = tk.Canvas(self.left_frame)
+        self.scrollbar = ttk.Scrollbar(self.left_frame, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="left", fill="y")
+
+
+        self.results_frame = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.results_frame, anchor="nw")
+
+        self.results_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+
+        
+    def populate_pdf_list(self):
+        # Assuming self.tmt_dir is correctly set up before this method is called
+        pdf_files = [f for f in os.listdir(self.tmt_dir) if f.endswith('.pdf')]
+        for pdf_file in pdf_files:
+            tk.Button(self.pdf_list_frame, text=pdf_file, command=lambda pdf=pdf_file: self.select_pdf(pdf)).pack(fill="x")
+    def select_pdf(self, pdf_file):
+        pdf_path = os.path.join(self.tmt_dir, pdf_file)
         print(f"pdf_path: {pdf_path}")
 
         comparer = ComparePdfTaf(pdf_path, self.file_manager)
         comparison_results = comparer.compare_pdf_taf()
         print(f"comparison_results: {comparison_results}")
 
-        # Display results
         self.display_comparison_results(comparison_results)
 
     def display_comparison_results(self, results):
-        # Clear previous results
+        # Clear previous results in the right frame's results display
         for widget in self.results_frame.winfo_children():
             widget.destroy()
 
-        # Configure results to display in centre with width of 200 pixels no matter the window size
-        self.results_frame.grid_columnconfigure(0, weight=1)
-        self.results_frame.grid_columnconfigure(1, minsize=300)
-        self.results_frame.grid_columnconfigure(2, weight=1)
+        # Adjusting this part to work with the results_frame specifically
         for idx, result in enumerate(results):
             part_number, match, taf_after_underscore, pdf_after_underscore = result[0], result[1], result[4], result[5]
             if match and taf_after_underscore != "Missing Revision" and pdf_after_underscore != "Missing Revision":
@@ -171,10 +226,10 @@ class FileUpdaterGUI:
                 text = f"{part_number}\nTAF & PDF Missing Revision"
             else:
                 bg_color = "red"
-                text = f"{part_number}\nTAF: {result[2]}_{pdf_after_underscore}, PDF: {result[3]}_{taf_after_underscore}"
+                text = f"{part_number}\nPDF: {result[2]}_{pdf_after_underscore}, TAF: {result[3]}_{taf_after_underscore}"
 
-            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white")
-            label.grid(row=idx, column=1, padx=15, pady=10, sticky="nsew")
+            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white", padx=5, pady=5)
+            label.pack(fill="both", padx=5, pady=5)
 
 def main():
     root = tk.Tk()

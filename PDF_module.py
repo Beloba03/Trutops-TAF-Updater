@@ -15,7 +15,7 @@ class PdfSearcher:
         print(f"Searching through: {file_path}")
         
         if all_parts:
-            search_pattern = r"GEO\\(.*?)\.GEO"
+            search_pattern = r"GEO\\?(?:.*?\\?)*([^\\]+)\.GEO"
             match_list = []
         else:
             search_pattern = rf"GEO\\.*?{self.search_string}.*?\.GEO"
