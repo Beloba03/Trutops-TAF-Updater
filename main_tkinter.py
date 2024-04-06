@@ -208,13 +208,14 @@ class FileUpdaterGUI:
         self.side_text.configure(wraplength=self.right_frame.winfo_width())
 
     def setup_scrollable_pdf_list(self):
+        """Creates the PDF selection canvas"""
         # Create a canvas within the left_frame with a fixed width of 300 pixels
         self.pdf_list_canvas = tk.Canvas(self.left_frame, width=300)
-        self.pdf_list_scrollbar = ttk.Scrollbar(self.left_frame, orient="vertical", command=self.pdf_list_canvas.yview)
-        pdf_text = tk.Label(self.left_frame, text="Select PDF File:                                     Results:", font=("Arial", 14, "bold"), pady=5)
-        pdf_text.pack(side="top", anchor="w")
+        self.pdf_list_scrollbar = ttk.Scrollbar(self.left_frame, orient="vertical", command=self.pdf_list_canvas.yview) # Add scrollbar to the canvas
+        pdf_text = tk.Label(self.left_frame, text="Select PDF File:                                     Results:", font=("Arial", 14, "bold"), pady=5) # Top labels
+        pdf_text.pack(side="top", anchor="w") # Labels are placed at top left
         
-        # Create a container frame for the search entry to control its pixel width
+        # Create a container frame for the search box to keep it from taking up the whole window width
         search_container = tk.Frame(self.left_frame, width=300, height=75)
         search_container.pack_propagate(False)  # Prevent the frame from resizing to fit its contents
         search_container.pack(side="top", padx=10, anchor="w")
@@ -222,108 +223,130 @@ class FileUpdaterGUI:
         # Add a search label and entry above the PDF list for clarity
         search_label = tk.Label(search_container, text="Search PDFs:", font=("Arial", 10, "bold"))
         search_label.pack(side="top", padx=10, pady=5)
-
         self.search_entry = tk.Entry(search_container, font=("Arial", 12))
         self.search_entry.pack(fill="x", expand=True)
-        self.search_entry.bind("<KeyRelease>", lambda event: self.filter_pdf_list())
+        self.search_entry.bind("<KeyRelease>", lambda event: self.filter_pdf_list()) # After every keystroke filter the PDF list
         
         # Configure the canvas to use the scrollbar
         self.pdf_list_canvas.configure(yscrollcommand=self.pdf_list_scrollbar.set)
         
         # Pack the canvas and the scrollbar closely together
-        self.pdf_list_canvas.pack(side="left", fill="y", expand=False)  # Changed fill to "y" to fill vertically only
-        self.pdf_list_scrollbar.pack(side="left", fill="y")  # Adjusted to fill "y" to match the canvas
+        self.pdf_list_canvas.pack(side="left", fill="y", expand=False)
+        self.pdf_list_scrollbar.pack(side="left", fill="y") 
         
         # Create an inner frame to hold the PDF buttons
         self.pdf_list_frame = ttk.Frame(self.pdf_list_canvas)
         self.pdf_list_canvas.create_window((0, 0), window=self.pdf_list_frame, anchor="nw", width=300)  # Set width of the window
         
-        # Ensure the canvas' scrollregion is updated when the inner frame changes size
+        # Update the canvas' scroll region when the inner frame changes size
         self.pdf_list_frame.bind("<Configure>", lambda e: self.pdf_list_canvas.configure(scrollregion=self.pdf_list_canvas.bbox("all")))
 
         # Thanks to Mikhail T. at https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar for this solution to bind to the current active widget for scrolling!
         self.pdf_list_frame.bind('<Enter>', lambda event, canvas=self.pdf_list_canvas: self.bound_to_mousewheel(event, canvas))
         self.pdf_list_frame.bind('<Leave>', lambda event, canvas=self.pdf_list_canvas: self.unbound_to_mousewheel(event, canvas))
+        
     def filter_pdf_list(self):
-        query = self.search_entry.get().lower()
+        """Filter pdf list based on search entry. This will hide any buttons that don't match the search string."""
+        query = self.search_entry.get().lower() # Make lowercase to stop case mismatches
         for widget in self.pdf_list_frame.winfo_children():
-            if query in widget.cget("text").lower():
+            # Check if the widget's text contains the search query. If it does, display it, otherwise hide it
+            if query in widget.cget("text").lower(): # Make lowercase to stop case mismatches
                 widget.pack(fill="x", padx=5, pady=2)
             else:
                 widget.pack_forget()
 
     def bound_to_mousewheel(self, event, passed_canvas):
+        """Event handler for binding the mouse wheel scroll event to the canvas."""
         # Bind the mouse wheel scroll event to the canvas
         passed_canvas.bind_all("<MouseWheel>", lambda event, canvas=passed_canvas: self.on_mousewheel(event, canvas))
 
     def unbound_to_mousewheel(self, event, passed_canvas):
+        """Event handler for unbinding the mouse wheel scroll event from the canvas."""
         # Unbind the mouse wheel scroll event from the bound canvas and bind back to results
         passed_canvas.bind_all("<MouseWheel>", lambda event, canvas=self.canvas: self.on_mousewheel(event, canvas))
 
     def on_mousewheel(self, event, canvas, amount=None):
-        """Scroll the canvas with the mouse wheel."""
-        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        """Event handler to scroll the canvas with the mouse wheel."""
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units") # This is only setup for Windows currently. If program is ever run on mac or unix platforms the scroll handling will need to be adjusted.
 
+    # https://www.tutorialspoint.com/python/tk_scrollbar.htm
     def setup_scrollable_results_frame(self):
+        """Setup frame to hold the results output"""
+        
+        # Scrollable canvas set immediately to the right of the PDF list
         self.canvas = tk.Canvas(self.left_frame)
-        self.scrollbar = ttk.Scrollbar(self.left_frame, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        scrollbar = ttk.Scrollbar(self.left_frame, orient="vertical", command=self.canvas.yview)
+        self.canvas.config(yscrollcommand=scrollbar.set)
         self.canvas.pack(side="left", fill="both", expand=True)
-        self.scrollbar.pack(side="left", fill="y")
+        scrollbar.pack(side="left", fill="y")
 
-
+        # Frame to hold the stack of results
         self.results_frame = ttk.Frame(self.canvas)
         self.canvas.create_window((0, 0), window=self.results_frame, anchor="nw")
 
+        # Allow results list to be resized with the window
         self.results_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-
-        
+   
     def populate_pdf_list(self):
-        # Assuming self.tmt_dir is correctly set up before this method is called
+        """Get all the PDF files in the TMT directory and add them to the PDF list frame."""
         pdf_files = [f for f in os.listdir(self.tmt_dir) if f.endswith('.pdf')]
+        
+        # Create button for each file
         for pdf_file in pdf_files:
             tk.Button(self.pdf_list_frame, text=pdf_file, command=lambda pdf=pdf_file: self.select_pdf(pdf)).pack(fill="x")
+            
     def select_pdf(self, pdf_file):
-        pdf_path = os.path.join(self.tmt_dir, pdf_file)
+        """Called with a PDF file. Calls check with TAF file and displays the results."""
+        pdf_path = os.path.join(self.tmt_dir, pdf_file) # Get TMT dir
         print(f"pdf_path: {pdf_path}")
-
+        
+        # Create instance of ComparePdfTaf and compare the PDF to the TAF files
         comparer = ComparePdfTaf(pdf_path, self.file_manager)
         comparison_results = comparer.compare_pdf_taf()
+        
+        # Check if the TAF file was found. If not, display an error message and end.
         if comparison_results is False:
             messagebox.showerror("Error", "TAF File not Found!")
             return
         print(f"comparison_results: {comparison_results}")
 
+        # Display the results in the output list
         self.display_comparison_results(comparison_results)
 
     def display_comparison_results(self, results):
-        # Clear previous results in the right frame's results display
+        """Creates a list of results in the results_frame. This will display the results of the PDF-TAF comparison.
+        The results are color coded. RED is for different revisions, GREEN is for matching revisions, and ORANGE is for missing revisions."""
+        # Clear previous results in the results frame's results display
         for widget in self.results_frame.winfo_children():
             widget.destroy()
 
-        # Adjusting this part to work with the results_frame specifically
-        for idx, result in enumerate(results):
-            part_number, match, taf_after_underscore, pdf_after_underscore = result[0], result[1], result[4], result[5]
+        # Iterate over all result tuples and create a color coded label for each
+        for result in results:
+            part_number, match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore = result[0], result[1], result[2], result[3], result[4], result[5] # Unpack the result tuple
+            
+            # Check if the parts match and revisions are present
             if match and taf_after_underscore != "Missing Revision" and pdf_after_underscore != "Missing Revision":
                 bg_color = "green"
                 text = part_number
-            elif taf_after_underscore == "Missing Revision" and pdf_after_underscore == "Missing Revision":
+            # Check if the parts match but revisions are missing
+            elif match and taf_after_underscore == "Missing Revision" and pdf_after_underscore == "Missing Revision":
                 bg_color = "orange"
                 text = f"{part_number}\nTAF & PDF Missing Revision"
+            # Parts dont have same revisions
             else:
                 bg_color = "red"
                 if result[2] != "Missing TAF":
-                    text = f"{part_number}\nPDF: {result[3]}_{pdf_after_underscore}, TAF: {result[2]}_{taf_after_underscore}"
+                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}_{taf_after_underscore}"
                 else:
-                    text = f"{part_number}\nPDF: {result[3]}_{pdf_after_underscore}, TAF: {result[2]}"
+                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}"
 
-            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white", padx=5, pady=5)
+            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white", padx=5, pady=5) # Create the label with the text and color
             label.pack(fill="both", padx=5, pady=5)
 
 def main():
-    root = tk.Tk()
-    app = FileUpdaterGUI(root)
-    root.mainloop()
+    root = tk.Tk() # Create root window
+    app = FileUpdaterGUI(root) # Create the GUI application
+    root.mainloop() # Call Tkinter loop
 
 if __name__ == "__main__":
     main()
