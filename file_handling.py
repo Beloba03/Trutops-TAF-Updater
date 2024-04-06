@@ -5,10 +5,11 @@ import datetime
 
 class ConfigManager:
     def __init__(self, file_path):
+        """This class implements the configuration manager. It reads the configuration file and returns the values of the configuration parameters."""
         self.file_path = file_path
     def load_config(self):
+        """Open the config file and return the contents"""
         try:
-            """Open the config file and return the contents"""
             with open(self.file_path, 'r') as file:
                 return file.read()
         except FileNotFoundError:
@@ -65,6 +66,7 @@ class ConfigManager:
     
 class FileManager:
     def __init__(self, taf_dir, geo_dir, backup_base_dir):
+        """Initializes the FileManager with the TAF and GEO directories and the backup directory. Creates the backup directory if it doesn't exist."""
         self.taf_dir = taf_dir
         self.geo_dir = geo_dir
         self.backup_base_dir = backup_base_dir
@@ -174,9 +176,9 @@ class FileManager:
                 # Remove the temp file if it doesn't get changed from the original
                 else:
                     os.remove(temp_write_path)
-            return [False, updated_taf_file_info]
+            return [False, updated_taf_file_info] # Successfully updated TAF files
         else:
-            return [True, None]
+            return [True, None] # GEO is missing
                 
     def write_change_log(self, taf_file, part_num, revision, old_ver):
         """Writes an entry to the change log"""
@@ -189,13 +191,14 @@ class FileManager:
         file_path = os.path.join(self.taf_dir, taf_name) # Combine the file with the file path in a system safe way
         geo_pattern = re.compile(r"GEO\\(?:.*\\)?([^\\]+)\.GEO")  # Pattern to get the part number
         try:
+            # Open the TAF and get all the parts
             with open(file_path, 'r') as file:
                 print(f"Reading TAF file: {file_path}") # Print to console for debugging
                 matches = []
                 for line in file:
                     match = geo_pattern.search(line)
                     if match:
-                        matches.append(match.group(1))
+                        matches.append(match.group(1)) # Append the part number to the list
                 return matches
         except FileNotFoundError:
             print("TAF file not found")

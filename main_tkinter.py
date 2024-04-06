@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox, scrolledtext
 from file_handling import *
 from PDF_module import PdfSearcher
 from pdf_taf_checker import ComparePdfTaf
+import multiprocessing as mp
 
 # This function checks if an input if just a single number. If it is it adds a leading 0
 def check_for_single_number(input_number):
@@ -11,6 +12,8 @@ def check_for_single_number(input_number):
     else:
         return input_number
     
+    
+# https://tkdocs.com/tutorial/index.html was used extensively in the development of the Tkinter window class
 class FileUpdaterGUI:
     """This is the GUI class for the file management application. It contains the setup for the window,tabs and the methods for the GUI features."""
     def __init__(self, root):
@@ -89,7 +92,7 @@ class FileUpdaterGUI:
             messagebox.showwarning("Warning", "Please provide a valid part number")
             return
         
-        # Allowing black revisions to be entered. Won't hurt anything and might be useful?
+        # Allowing blank revisions to be entered. Won't hurt anything and might be useful?
         new_revision = check_for_single_number(self.new_revision_entry.get())
         
         # Call the read_and_update_taf_files method with the input. Status will return True if the GEO doesn't exist.
@@ -327,7 +330,7 @@ class FileUpdaterGUI:
             # Check if the parts match and revisions are present
             if match and taf_after_underscore != "Missing Revision" and pdf_after_underscore != "Missing Revision":
                 bg_color = "green"
-                text = part_number
+                text = f"{part_number}\nRevision: {pdf_after_underscore}"
             # Check if the parts match but revisions are missing
             elif match and taf_after_underscore == "Missing Revision" and pdf_after_underscore == "Missing Revision":
                 bg_color = "orange"
@@ -340,7 +343,7 @@ class FileUpdaterGUI:
                 else:
                     text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}"
 
-            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white", padx=5, pady=5) # Create the label with the text and color
+            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white", padx=15, pady=5) # Create the label with the text and color
             label.pack(fill="both", padx=5, pady=5)
 
 def main():
@@ -349,4 +352,8 @@ def main():
     root.mainloop() # Call Tkinter loop
 
 if __name__ == "__main__":
+    
+    # Stop the Multiprocessing from entering into an infinite window spawning loop when running the script through PyInstaller EXE
+    # https://superfastpython.com/multiprocessing-freeze-support-in-python/
+    mp.freeze_support()
     main()
