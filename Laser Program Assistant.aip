@@ -38,9 +38,9 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
     <ROW Component="APPDIR" ComponentId="{AB421855-B369-43BC-BAF6-249B45B9C896}" Directory_="APPDIR" Attributes="0"/>
+    <ROW Component="FileIcon.ico" ComponentId="{839DD97C-DB7E-4792-9440-F404368CCFD6}" Directory_="APPDIR" Attributes="0" KeyPath="FileIcon.ico" Type="0"/>
     <ROW Component="ProductInformation" ComponentId="{C0778E50-C7DC-4143-A2E2-6936FECBF7C9}" Directory_="APPDIR" Attributes="260" KeyPath="Version"/>
     <ROW Component="SHORTCUTDIR" ComponentId="{7A5FF5BD-9276-47E2-9E65-C12557F84953}" Directory_="SHORTCUTDIR" Attributes="0"/>
-    <ROW Component="config.txt" ComponentId="{39304869-4CFA-47FC-9D25-B72A37BAF862}" Directory_="APPDIR" Attributes="0" KeyPath="config.txt" Type="0"/>
     <ROW Component="main_tkinter.exe" ComponentId="{807098BC-E731-4097-87F8-980DDFE4E7DC}" Directory_="APPDIR" Attributes="256" KeyPath="main_tkinter.exe"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
@@ -48,8 +48,8 @@
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
-    <ROW File="config.txt" Component_="config.txt" FileName="config.txt" Attributes="0" SourcePath="dist\config.txt" SelfReg="false"/>
     <ROW File="main_tkinter.exe" Component_="main_tkinter.exe" FileName="MAIN_T~1.EXE|main_tkinter.exe" Attributes="0" SourcePath="dist\main_tkinter.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="FileIcon.ico" Component_="FileIcon.ico" FileName="FileIcon.ico" Attributes="0" SourcePath="dist\FileIcon.ico" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
@@ -126,9 +126,9 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatCompsComponent">
     <ROW Feature_="MainFeature" Component_="APPDIR"/>
     <ROW Feature_="MainFeature" Component_="ProductInformation"/>
-    <ROW Feature_="MainFeature" Component_="config.txt"/>
     <ROW Feature_="MainFeature" Component_="main_tkinter.exe"/>
     <ROW Feature_="MainFeature" Component_="SHORTCUTDIR"/>
+    <ROW Feature_="MainFeature" Component_="FileIcon.ico"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="main_tkinter.exe" SourcePath="FileIcon.ico" Index="0"/>
