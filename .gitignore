@@ -2,6 +2,8 @@
 *.spec
 *.toc
 *.msi
+*.pdf
+.DS_Store
 dist/
 build/
-*.pdf
+
