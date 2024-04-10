@@ -1,3 +1,4 @@
+# This module contains all code related to PDF-TAF comparisons
 from PDF_module import PdfSearcher
 import re
 

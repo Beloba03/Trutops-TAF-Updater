@@ -1,3 +1,4 @@
+# This module contains all the code related to GUI creation and management
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
 from file_handling import *
@@ -20,10 +21,14 @@ class FileUpdaterGUI:
         """Assign the initialization variables and call the setup_gui method."""
         self.root = root
         self.config_manager = ConfigManager('config.txt') # Open the config.txt file with the ConfigManager class
-        self.geo_dir = self.config_manager.get_geo_dir()
-        self.taf_dir = self.config_manager.get_taf_dir()
-        self.backup_dir = self.config_manager.get_backup_dir()
-        self.tmt_dir = self.config_manager.get_tmt_dir() 
+        try:
+            self.geo_dir = self.config_manager.get_geo_dir()
+            self.taf_dir = self.config_manager.get_taf_dir()
+            self.backup_dir = self.config_manager.get_backup_dir()
+            self.tmt_dir = self.config_manager.get_tmt_dir() 
+        except ValueError as error:
+            messagebox.showerror("Error", error)
+            exit(1)
         self.file_manager = FileManager(self.taf_dir, self.geo_dir, self.backup_dir) # Create a new FileManager instance using the directories from the config
         self.setup_gui() # Call the window setup method
     

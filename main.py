@@ -1,5 +1,7 @@
 from file_handling import *
 
+# This module runs the TAF updated in a command line window
+
 # This function checks if an input if just a single number. If it is it adds a leading 0
 def check_for_single_number(input_number):
     if re.match(r"^\d$", input_number): # Use regex to check for single digit number

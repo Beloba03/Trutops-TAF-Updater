@@ -1,3 +1,4 @@
+# This module contains all code related to TAF management and reading
 import re
 import os
 import shutil
@@ -12,12 +13,11 @@ class ConfigManager:
         try:
             with open(self.file_path, 'r') as file:
                 return file.read()
+        # Catch errors if the file is not found or there are permission issues
         except FileNotFoundError:
-            print(f"Error: The configuration file {self.file_path} was not found.")
-            exit(1)
+            raise ValueError(f"Config file not found at {os.path.abspath(self.file_path)}") # Get full path not relative path
         except PermissionError:
-            print(f"Error: Permission denied when trying to read {self.file_path}.")
-            exit(1)
+            raise ValueError(f"Insufficient permissions to read the config file at {os.path.abspath(self.file_path)}")
     def get_geo_dir(self):
         """Gets the GEO directory for the configuration"""
         config = self.load_config()
@@ -45,7 +45,7 @@ class ConfigManager:
         
         # Check if the line was found
         if not matches:
-            raise ValueError("TAF_DIR configuration not found or is invalid in the configuration file.")
+            raise ValueError("TMT_DIR configuration not found or is invalid in the configuration file.")
         print(f"TAF: {matches[0]}")
         return matches[0]
     def get_backup_dir(self):

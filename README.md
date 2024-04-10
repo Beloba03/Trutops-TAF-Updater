@@ -2,12 +2,8 @@
 
 ## Purpose
 
-This program automates the process of updating .TAF files used by Trumpf CNC laser cutters. These files contain a list of parts (stored in .GEO files) and their locations on a sheet of metal, known as a nest. When the name of a .GEO file changes due to part revisions, the associated .TAF files need to be updated to reflect these changes. This is a time-consuming manual process. This program aims to speed up the updating process, saving hours of manual work by automatically finding and updating the paths of .GEO files in .TAF files.
+This program automates the process of updating .TAF files used by Trumpf CNC laser cutters. These files contain a list of parts (stored in .GEO files) and their locations on a sheet of metal, known as a nest. When the name of a .GEO file changes due to part revisions, the associated .TAF files need to be updated to reflect these changes. This is a time-consuming manual process. This program aims to speed up the updating process, saving hours of manual work by automatically finding and updating the paths of .GEO files in .TAF files. The program also contains teh ability to search PDF files for specific parts and validate PDF files with the corresponding TAF file.
 
-## Project video
-
-The project video is accesible at the following link:
-https://drive.google.com/file/d/1WFt3TDTAFl8Jq0j9CZuuLbqSYM-E8JTE/view?usp=sharing
 
 ## Features
 
@@ -18,20 +14,25 @@ https://drive.google.com/file/d/1WFt3TDTAFl8Jq0j9CZuuLbqSYM-E8JTE/view?usp=shari
 - **Validation** to ensure a .GEO file with the requested revision exists, with user confirmation for unmatched files.
 - **Support for design and production parts**, handling both numerical and lettered revision formats and allowing transition between these formats.
 - **Part type support** for HEX, CAB, ELB with a specific part number structure.
-- **Optional features** include part number replacement in specific TAFs and backup storage for modified TAF files, linked to log entries.
+- **PDF search** to make looking for programs containing specific parts easier
+- **PDF/program validation** to make sure that programs are made for the latest version of TAF files
 
 ## Modules Required
 
 This program utilizes Python standard libraries including `re`, `os`, `shutil`, and `datetime`. The main modules include:
 
-- `main.py`
+- `main_tkinter.py`
 - `file_handling.py`
+- `PDF_module.py`
+- `pdf_taf_checker.py`
 
 ## Setup
 
 ### Prerequisites
 
-- Python 3.11.7 or newer. Tested on both Unix and Windows OS environments.
+- Python 3.11.7 or newer.
+- Windows
+- PyMuPDF 1.24.1 or newer.
 - Configuration: Directories for GEO, TAF, and backups must be specified in the `config.txt` file.
 
 ### Installation
@@ -42,8 +43,7 @@ This program utilizes Python standard libraries including `re`, `os`, `shutil`, 
 
 ### Usage
 
-Run `main.py` to start the program. Follow the on-screen prompts to specify the .GEO file revisions and the .TAF files you wish to update. The program will automatically update the .TAF files based on your input and log all changes.
-It is recommended to test the program in an enclosed environment before deploying it on a full database to ensure compatibility and to prevent any data loss.
+Run `main_tkinter.py` to start the program. Use the Tkinter GUI to interact with the program.
 
 ## Testing and Troubleshooting
 
@@ -68,7 +68,7 @@ For peer evaluation testing the files Example.TAF, Example2.TAF, and Example3.TA
    - **Test Case:** Specify a .GEO file in the update request that does not exist in the GEO directory.
    - **Expected Outcome:** Prompt: "The GEO does not exist, are you sure you want to update? (Y/N):"
 
-4. **Invalid GEO and/or TAF Directory**
+4. **Invalid GEO, TAF, TMT, or BACKUP Directory**
    
    - **Test Case:** Misconfigure the GEO directory path in `config.txt` to a non-existent location.
    - **Expected Outcome:** Error message: "The GEO directory /Users/benb/Python for Engineers/Python GEO TAF/GdEO was not found."
@@ -81,6 +81,11 @@ For peer evaluation testing the files Example.TAF, Example2.TAF, and Example3.TA
 6. **Wrong TAF File Specified**
    
    - **Test Case:** Specify a .TAF file for updating that does not exist or is not found in the specified TAF directory.
+   - **Expected Outcome:** Error message: "TAF file not found."
+
+7. **PDF has no TAF with same name**
+   
+   - **Test Case:** Specify a .PDF file for a revision check with no TAF that has the same name.
    - **Expected Outcome:** Error message: "TAF file not found."
 
 ### General Troubleshooting

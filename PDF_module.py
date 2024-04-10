@@ -1,7 +1,7 @@
+# This module contains all code related to PDF management and reading
 import os
 import re
 import multiprocessing
-from functools import partial
 import fitz
 
 class PdfSearcher:
