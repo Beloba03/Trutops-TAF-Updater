@@ -43,7 +43,10 @@ This program utilizes Python standard libraries including `re`, `os`, `shutil`, 
 
 ### Usage
 
-Run `main_tkinter.py` to start the program. Use the Tkinter GUI to interact with the program.
+**If running from `.exe`:** Run `main_tkinter.exe` (may need administrative privileges). On first launch select the appropriate directories.
+
+**If running from `.py`:** Run `main_tkinter.py` to start the program. Use the Tkinter GUI to interact with the program. On first launch select the appropriate directories.
+
 
 ## Testing and Troubleshooting
 

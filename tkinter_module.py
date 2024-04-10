@@ -68,9 +68,16 @@ class FileUpdaterGUI:
         config_content = f"""GEO_DIR: "{geo_dir}"\nTAF_DIR: "{taf_dir}"\nTMT_DIR: "{tmt_dir}"\nBACKUP_DIR: "{backup_dir}\""""
         
         # Write the directory paths to the config.txt file
-        with open('config.txt', 'w') as config_file:
-            config_file.write(config_content)
-        self.load_config()
+        try:
+            with open('config.txt', 'w') as config_file:
+                config_file.write(config_content)
+            self.load_config()
+        except FileNotFoundError as error:
+            messagebox.showerror("Error", error)
+            exit(1)
+        except PermissionError as error:
+            messagebox.showerror("Error", f"{error}\nProbably needs run as admin to update config file")
+            exit(1)
             
     def load_config(self):
         """Attempt to load the configuration from the config file."""
