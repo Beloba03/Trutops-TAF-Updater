@@ -19,7 +19,7 @@ This program automates the process of updating .TAF files used by Trumpf CNC las
 
 ## Modules Required
 
-This program utilizes Python standard libraries including `re`, `os`, `shutil`, and `datetime`. The main modules include:
+This program utilizes Python standard libraries including `re`, `os`, `shutil`, `Tkinter`, `Multiprocessing`, and `datetime`. The main modules include:
 
 - `main_tkinter.py`
 - `file_handling.py`
@@ -56,7 +56,7 @@ For peer evaluation testing the files Example.TAF, Example2.TAF, and Example3.TA
 1. **Missing Configuration File**
    
    - **Test Case:** Run the program without a `config.txt` file present in the directory.
-   - **Expected Outcome:** Error message: "The configuration file config.txt was not found."
+   - **Expected Outcome:** Error message: "Config file created at "directory"", New config.txt file will be created at "directory"
 
 2. **Missing Lines in Configuration**
    

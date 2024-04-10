@@ -1,4 +1,4 @@
-GEO_DIR: "C:\Users\benba\OneDrive\Desktop\Laser DB\Laser DB 04-04-2024\User1\GEO"
-TAF_DIR: "C:\Users\benba\OneDrive\Desktop\Laser DB\Laser DB 04-04-2024\User1\JOB-TAF"
-TMT_DIR: "C:\Users\benba\OneDrive\Desktop\Laser DB\Laser DB 04-04-2024\User1\TMT-LST"
-BACKUP_DIR: "C:\Users\benba\OneDrive\Desktop\Laser DB\Laser DB 04-04-2024\User1\TAF-BACKUP"
+GEO_DIR: "C:/Users/benba/OneDrive/Desktop/Laser DB/Laser DB 04-04-2024/User1/GEO"
+TAF_DIR: "C:/Users/benba/OneDrive/Desktop/Laser DB/Laser DB 04-04-2024/User1/JOB-TAF"
+TMT_DIR: "C:/Users/benba/OneDrive/Desktop/Laser DB/Laser DB 04-04-2024/User1/TMT-LST"
+BACKUP_DIR: "C:/Users/benba/OneDrive/Desktop/Laser DB/Laser DB 04-04-2024/User1"

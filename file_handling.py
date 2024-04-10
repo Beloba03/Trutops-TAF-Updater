@@ -3,7 +3,12 @@ import re
 import os
 import shutil
 import datetime
-
+class ConfigFileNotFoundError(Exception):
+    """Exception raised when the config file is not found."""
+    pass
+class ConfigFileWrongDir(Exception):
+    """Exception raised when the config file is not found."""
+    pass
 class ConfigManager:
     def __init__(self, file_path):
         """This class implements the configuration manager. It reads the configuration file and returns the values of the configuration parameters."""
@@ -15,17 +20,27 @@ class ConfigManager:
                 return file.read()
         # Catch errors if the file is not found or there are permission issues
         except FileNotFoundError:
-            raise ValueError(f"Config file not found at {os.path.abspath(self.file_path)}") # Get full path not relative path
+            config_content = """GEO_DIR: "<Enter path between quotes>"\nTAF_DIR: "<Enter path between quotes>"\nTMT_DIR: "<Enter path between quotes>"\nBACKUP_DIR: "<Enter path between quotes>\""""
+            # Writing default configuration to the file
+            with open(self.file_path, 'w') as config_file:
+                config_file.write(config_content)
+            
+            print(f"Config file created at {os.path.abspath(self.file_path)}")
+            raise ConfigFileNotFoundError(f"New config file has been made at: {os.path.abspath(self.file_path)}")
         except PermissionError:
             raise ValueError(f"Insufficient permissions to read the config file at {os.path.abspath(self.file_path)}")
     def get_geo_dir(self):
         """Gets the GEO directory for the configuration"""
         config = self.load_config()
         matches = re.findall(r'GEO_DIR: "(.*)"', config)
-        
+                
         # Check if the line was found
         if not matches:
             raise ValueError("GEO_DIR configuration not found or is invalid in the configuration file.")
+        
+        # Check directories exist
+        if not os.path.isdir(matches[0]):
+            raise ConfigFileWrongDir(f"Directory {matches[0]} not found.")
         print(f"GEO: {matches[0]}")
         return matches[0]   
     def get_taf_dir(self):
@@ -37,6 +52,10 @@ class ConfigManager:
         if not matches:
             raise ValueError("TAF_DIR configuration not found or is invalid in the configuration file.")
         print(f"TAF: {matches[0]}")
+        
+        # Check directories exist
+        if not os.path.isdir(matches[0]):
+            raise ConfigFileWrongDir(f"Directory {matches[0]} not found.")
         return matches[0]
     def get_tmt_dir(self):
         """Gets the TAF directory from the configuration"""
@@ -46,7 +65,11 @@ class ConfigManager:
         # Check if the line was found
         if not matches:
             raise ValueError("TMT_DIR configuration not found or is invalid in the configuration file.")
-        print(f"TAF: {matches[0]}")
+        
+        # Check directories exist
+        if not os.path.isdir(matches[0]):
+            raise ConfigFileWrongDir(f"Directory {matches[0]} not found.")
+        print(f"TMT: {matches[0]}")
         return matches[0]
     def get_backup_dir(self):
         """Gets the backup directory from the configuration"""
@@ -56,6 +79,11 @@ class ConfigManager:
         # Check if the line was found
         if not matches:
             raise ValueError("BACKUP_DIR configuration not found or is invalid in the configuration file.")
+        
+        # Check directories exist
+        if not os.path.isdir(matches[0]):
+            raise ConfigFileWrongDir(f"Directory {matches[0]} not found.")
+        
         return matches[0]
     def return_TAF_dir(self):
         """Returns the TAF directory"""
@@ -83,6 +111,9 @@ class FileManager:
         except PermissionError:
             print(f"Error: Cannot list contents of {self.geo_dir} due to lack of permissions.")
             exit(1)
+    def set_backup_dir(self, backup_dir):
+        """Sets the backup directory"""
+        self.backup_base_dir = backup_dir
     def search_for_tafs(self):
         """Search directory for .TAF files"""
         try:
