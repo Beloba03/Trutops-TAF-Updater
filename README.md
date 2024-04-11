@@ -22,6 +22,7 @@ This program automates the process of updating .TAF files used by Trumpf CNC las
 This program utilizes Python standard libraries including `re`, `os`, `shutil`, `Tkinter`, `Multiprocessing`, and `datetime`. The main modules include:
 
 - `main_tkinter.py`
+- `tkinter_module.py`
 - `file_handling.py`
 - `PDF_module.py`
 - `pdf_taf_checker.py`
