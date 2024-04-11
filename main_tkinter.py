@@ -3,7 +3,6 @@ import tkinter as tk
 from file_handling import *
 import multiprocessing as mp
 from time import sleep
-from sys import exit # Using this instead of typical exit because the program is run from a pyinstaller exe
 from tkinter_module import FileUpdaterGUI
 
 # Thanks to https://stackoverflow.com/questions/71884285/tkinter-root-window-mouse-drag-motion-becomes-slower for this solution to high polling rate mouse support!
