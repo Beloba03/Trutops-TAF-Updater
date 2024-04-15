@@ -36,6 +36,8 @@ class FileUpdaterGUI:
     """This is the GUI class for the file management application. It contains the setup for the window,tabs and the methods for the GUI features."""
     def __init__(self, root):
         """Assign the initialization variables and call the setup_gui method."""
+        self.active_button = None  # Attribute to keep track of the active PDF selection button
+        self.pdf_files = [] # List of PDF files to maintain order
         self.root = root
         self.root.withdraw()
         self.config_manager = ConfigManager(resource_path('config.txt')) # Open the config.txt file with the ConfigManager class
@@ -345,15 +347,21 @@ class FileUpdaterGUI:
         self.pdf_list_frame.bind('<Enter>', lambda event, canvas=self.pdf_list_canvas: self.bound_to_mousewheel(event, canvas))
         self.pdf_list_frame.bind('<Leave>', lambda event, canvas=self.pdf_list_canvas: self.unbound_to_mousewheel(event, canvas))
         
-    def filter_pdf_list(self):
+    def filter_pdf_list(self, event=None):
         """Filter pdf list based on search entry. This will hide any buttons that don't match the search string."""
-        query = self.search_entry.get().lower() # Make lowercase to stop case mismatches
+        query = self.search_entry.get().lower()  # Get the current search query and make it lowercase
+
+        # Clear current buttons
         for widget in self.pdf_list_frame.winfo_children():
-            # Check if the widget's text contains the search query. If it does, display it, otherwise hide it
-            if query in widget.cget("text").lower(): # Make lowercase to stop case mismatches
-                widget.pack(fill="x", padx=5, pady=2)
-            else:
-                widget.pack_forget()
+            widget.destroy()
+
+        # Filter and display buttons based on the search query. Instead of destroying the old buttons they are completely removed and regenerated. This maintains the order of the buttons.
+        for pdf_file in self.pdf_files:
+            if query in pdf_file.lower():  # Check if query is part of the file name
+                btn = tk.Button(self.pdf_list_frame, text=pdf_file, relief="raised")
+                btn.pack(fill="x")
+                btn.config(command=lambda b=btn, pdf=pdf_file: self.select_pdf(b, pdf))
+
 
     def bound_to_mousewheel(self, event, passed_canvas):
         """Event handler for binding the mouse wheel scroll event to the canvas."""
@@ -393,14 +401,20 @@ class FileUpdaterGUI:
         for widget in self.pdf_list_frame.winfo_children():
             widget.destroy()
             
-        pdf_files = [f for f in os.listdir(self.tmt_dir) if f.endswith('.pdf')]
+        self.pdf_files = [f for f in os.listdir(self.tmt_dir) if f.endswith('.pdf')]
         
         # Create button for each file
-        for pdf_file in pdf_files:
-            tk.Button(self.pdf_list_frame, text=pdf_file, command=lambda pdf=pdf_file: self.select_pdf(pdf)).pack(fill="x")
+        for pdf_file in self.pdf_files:
+            btn = tk.Button(self.pdf_list_frame, text=pdf_file, relief="raised")
+            btn.pack(fill="x")
+            btn.config(command=lambda b=btn, pdf=pdf_file: self.select_pdf(b, pdf))
             
-    def select_pdf(self, pdf_file):
+    def select_pdf(self, button, pdf_file):
         """Called with a PDF file. Calls check with TAF file and displays the results."""
+        if self.active_button:
+            self.active_button.config(relief="raised")  # Reset the previous active button
+        button.config(relief="sunken")  # Set the new button to look pressed
+        self.active_button = button  # Update the reference to the active button
         pdf_path = os.path.join(self.tmt_dir, pdf_file) # Get TMT dir
         print(f"pdf_path: {pdf_path}")
         
@@ -420,29 +434,54 @@ class FileUpdaterGUI:
     def display_comparison_results(self, results):
         """Creates a list of results in the results_frame. This will display the results of the PDF-TAF comparison.
         The results are color coded. RED is for different revisions, GREEN is for matching revisions, and ORANGE is for missing revisions."""
+        
+        # Function to look up the color based on the GEO State
+        def get_color_based_on_geo_state(geo_state):
+            # Iterate through each regex pattern in the dictionary
+            for pattern, color in geo_state_colors.items():
+                if re.search(pattern, geo_state):
+                    return color  # Return the color if the regex matches the geo_state
+            return 'white'  # Default color if no pattern matches
+        
         # Clear previous results in the results frame's results display
         for widget in self.results_frame.winfo_children():
             widget.destroy()
+            
+        # Define a color map for text color based on GEO State
+        geo_state_colors = {
+            'GEO missing revision': 'purple',
+            'No GEO found': 'purple',
+            r'Newer GEO.*': 'blue',
+            r'Latest GEO revision is.*': 'blue',
+            r'Program contains latest.*': 'white',
+        }
 
         # Iterate over all result tuples and create a color coded label for each
         for result in results:
-            part_number, match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore = result[0], result[1], result[2], result[3], result[4], result[5] # Unpack the result tuple
+            part_number, match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore, geo_state = result[0], result[1], result[2], result[3], result[4], result[5], result[6] # Unpack the result tuple
             
             # Check if the parts match and revisions are present
             if match and taf_after_underscore != "Missing Revision" and pdf_after_underscore != "Missing Revision":
                 bg_color = "green"
-                text = f"{part_number}\nRevision: {pdf_after_underscore}"
+                text = f"{part_number}\nRevision: {pdf_after_underscore}\nGEO State: {geo_state}"
             # Check if the parts match but revisions are missing
             elif match and taf_after_underscore == "Missing Revision" and pdf_after_underscore == "Missing Revision":
                 bg_color = "orange"
-                text = f"{part_number}\nTAF & PDF Missing Revision"
+                text = f"{part_number}\nTAF & PDF Missing Revision\nGEO State: {geo_state}"
             # Parts dont have same revisions
             else:
                 bg_color = "red"
-                if result[2] != "Missing TAF":
-                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}_{taf_after_underscore}"
+                
+                # Different formats depending on what issue there is
+                if pdf_before_underscore == "Part not found":
+                    text = f"{part_number}\nPDF: {pdf_before_underscore}, TAF: {taf_before_underscore}_{taf_after_underscore}\nGEO State: {geo_state}"
+                elif result[2] != "Missing TAF":
+                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}_{taf_after_underscore}\nGEO State: {geo_state}"
                 else:
-                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}"
-
-            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg="white", padx=15, pady=5) # Create the label with the text and color
+                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}\nGEO State: {geo_state}"
+            
+            print(f"GEOSTATE: {geo_state}")
+            fg_color = get_color_based_on_geo_state(geo_state)  # Default to black if state is not in the map
+            print(f"FGCOL: {fg_color}")
+            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg=fg_color, padx=15, pady=5) # Create the label with the text and color
             label.pack(fill="both", padx=5, pady=5)

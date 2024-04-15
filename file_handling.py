@@ -102,7 +102,9 @@ class FileManager:
         # Ensure the backup_base_dir exists
         if not os.path.exists(self.backup_base_dir):
             os.makedirs(self.backup_base_dir)
-        
+        self.get_geo_list()
+    
+    def get_geo_list(self):
         try:
             self.geo_list = [file for file in os.listdir(self.geo_dir) if file.endswith('.GEO')] # Get the list of GEO files (only needs to run once at init to save time)
         except FileNotFoundError:
@@ -111,6 +113,8 @@ class FileManager:
         except PermissionError:
             print(f"Error: Cannot list contents of {self.geo_dir} due to lack of permissions.")
             exit(1)
+        return self.geo_list
+            
     def set_backup_dir(self, backup_dir):
         """Sets the backup directory"""
         self.backup_base_dir = backup_dir
