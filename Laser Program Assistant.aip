@@ -16,7 +16,7 @@
     <ROW Property="ProductCode" Value="1033:{F75EA40A-85BE-4F3D-8F65-874866857776} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="Laser Program Assistant"/>
-    <ROW Property="ProductVersion" Value="1.0.0" Options="32"/>
+    <ROW Property="ProductVersion" Value="1.0.1" Options="32"/>
     <ROW Property="RUNAPPLICATION" Value="1" Type="4"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{28C63764-16C4-4DB0-9038-24B5F02DD291}"/>
