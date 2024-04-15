@@ -137,3 +137,4 @@ class ComparePdfTaf():
             comparison_results.append((taf_part, is_match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore, pdf_geo_state))
 
         return comparison_results # Return list of tuples
+ 
