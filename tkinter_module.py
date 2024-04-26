@@ -355,10 +355,14 @@ class FileUpdaterGUI:
         for widget in self.pdf_list_frame.winfo_children():
             widget.destroy()
 
-        # Filter and display buttons based on the search query. Instead of destroying the old buttons they are completely removed and regenerated. This maintains the order of the buttons.
+        # If active button was among the destroyed, clear the reference
+        self.active_button = None
+
+        # Filter and display buttons based on the search query.
         for pdf_file in self.pdf_files:
             if query in pdf_file.lower():  # Check if query is part of the file name
                 btn = tk.Button(self.pdf_list_frame, text=pdf_file, relief="raised")
+                btn.pdf_file = pdf_file  # Attach pdf_file as an attribute of the button
                 btn.pack(fill="x")
                 btn.config(command=lambda b=btn, pdf=pdf_file: self.select_pdf(b, pdf))
 
@@ -411,7 +415,7 @@ class FileUpdaterGUI:
             
     def select_pdf(self, button, pdf_file):
         """Called with a PDF file. Calls check with TAF file and displays the results."""
-        if self.active_button:
+        if self.active_button and self.active_button.winfo_exists():
             self.active_button.config(relief="raised")  # Reset the previous active button
         button.config(relief="sunken")  # Set the new button to look pressed
         self.active_button = button  # Update the reference to the active button
