@@ -40,7 +40,7 @@ class FileUpdaterGUI:
         self.pdf_files = [] # List of PDF files to maintain order
         self.root = root
         self.root.withdraw()
-        self.config_manager = ConfigManager(resource_path('config.txt')) # Open the config.txt file with the ConfigManager class
+        self.config_manager = ConfigManager() # Open the config.txt file with the ConfigManager class
         self.load_config()
 
         self.file_manager = FileManager(self.taf_dir, self.geo_dir, self.backup_dir) # Create a new FileManager instance using the directories from the config
@@ -71,7 +71,8 @@ class FileUpdaterGUI:
         
         # Write the directory paths to the config.txt file
         try:
-            with open('config.txt', 'w') as config_file:
+            file_path = self.config_manager.get_config_dir()
+            with open(file_path, 'w') as config_file:
                 config_file.write(config_content)
             self.load_config()
         except FileNotFoundError as error:
@@ -90,6 +91,7 @@ class FileUpdaterGUI:
                 self.geo_dir = self.config_manager.get_geo_dir()
                 self.taf_dir = self.config_manager.get_taf_dir()
                 self.backup_dir = self.config_manager.get_backup_dir()
+                print(f"Backup dir: {self.backup_dir}")
                 self.tmt_dir = self.config_manager.get_tmt_dir()
                 config_loaded = True  # Config successfully loaded, exit loop
             except ValueError as error:

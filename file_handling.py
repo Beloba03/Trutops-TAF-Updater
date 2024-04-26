@@ -10,25 +10,46 @@ class ConfigFileWrongDir(Exception):
     """Exception raised when the config file is not found."""
     pass
 class ConfigManager:
-    def __init__(self, file_path):
-        """This class implements the configuration manager. It reads the configuration file and returns the values of the configuration parameters."""
-        self.file_path = file_path
+    def __init__(self, file_name='config.txt'):
+        """This class implements the configuration manager. It initializes or uses the existing configuration file in the AppData folder."""
+        # Ensures that the LOCALAPPDATA environment variable is being correctly fetched
+        appdata_path = os.getenv('LOCALAPPDATA')
+        if not appdata_path:
+            raise EnvironmentError("LOCALAPPDATA environment variable is not available.")
+        
+        print(f"LOCALAPPDATA environment variable {appdata_path}")
+        
+        # Sets up the full path to the application's config directory
+        self.app_dir = os.path.join(appdata_path, 'LaserAssistant')
+        print(f"Application directory: {self.app_dir}")  # Diagnostic output
+
+        # Checks if the directory exists, creates if not
+        if not os.path.exists(self.app_dir):
+            os.makedirs(self.app_dir)
+            print(f"Created directory at: {self.app_dir}")  # Diagnostic output
+        
+        # Sets the full path to the configuration file
+        self.file_path = os.path.join(self.app_dir, file_name)
+        print(f"App directory: {self.app_dir}")  # Diagnostic output
+        print(f"Configuration file path is at: {self.file_path}")  # Diagnostic output
+    
     def load_config(self):
-        """Open the config file and return the contents"""
-        try:
-            with open(self.file_path, 'r') as file:
-                return file.read()
-        # Catch errors if the file is not found or there are permission issues
-        except FileNotFoundError:
-            config_content = """GEO_DIR: "<Enter path between quotes>"\nTAF_DIR: "<Enter path between quotes>"\nTMT_DIR: "<Enter path between quotes>"\nBACKUP_DIR: "<Enter path between quotes>\""""
-            # Writing default configuration to the file
-            with open(self.file_path, 'w') as config_file:
-                config_file.write(config_content)
-            
-            print(f"Config file created at {os.path.abspath(self.file_path)}")
-            raise ConfigFileNotFoundError(f"New config file has been made at: {os.path.abspath(self.file_path)}")
-        except PermissionError:
-            raise ValueError(f"Insufficient permissions to read the config file at {os.path.abspath(self.file_path)}")
+            """Open the config file and return the contents"""
+            try:
+                with open(self.file_path, 'r') as file:
+                    return file.read()
+            # Catch errors if the file is not found or there are permission issues
+            except FileNotFoundError:
+                config_content = """GEO_DIR: "<Enter path between quotes>"\nTAF_DIR: "<Enter path between quotes>"\nTMT_DIR: "<Enter path between quotes>"\nBACKUP_DIR: "<Enter path between quotes>\""""
+                # Writing default configuration to the file
+                with open(self.file_path, 'w') as config_file:
+                    config_file.write(config_content)
+                
+                print(f"Config file created at {os.path.abspath(self.file_path)}")
+                raise ConfigFileNotFoundError(f"New config file has been made at: {os.path.abspath(self.file_path)}")
+            except PermissionError:
+                raise ValueError(f"Insufficient permissions to read the config file at {os.path.abspath(self.file_path)}")
+        
     def get_geo_dir(self):
         """Gets the GEO directory for the configuration"""
         config = self.load_config()
@@ -83,8 +104,9 @@ class ConfigManager:
         # Check directories exist
         if not os.path.isdir(matches[0]):
             raise ConfigFileWrongDir(f"Directory {matches[0]} not found.")
-        
         return matches[0]
+    def get_config_dir(self):
+        return self.file_path
     def return_TAF_dir(self):
         """Returns the TAF directory"""
         return self.get_taf_dir()
@@ -98,6 +120,7 @@ class FileManager:
         self.taf_dir = taf_dir
         self.geo_dir = geo_dir
         self.backup_base_dir = backup_base_dir
+        print("BACKUP BASE DIRECTORY: ", self.backup_base_dir)
         
         # Ensure the backup_base_dir exists
         if not os.path.exists(self.backup_base_dir):
