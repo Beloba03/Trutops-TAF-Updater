@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="21.6" version="23.2" Modules="simple" RootPath="." Language="en" Id="{035FF740-8100-489C-9524-AA3875D911D0}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="21.6" version="21.6" Modules="simple" RootPath="." Language="en" Id="{035FF740-8100-489C-9524-AA3875D911D0}">
+  <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
+    <ROW Name="HiddenItems" Value="AppXProductDetailsComponent;AppXDependenciesComponent;AppXAppDetailsComponent;AppXVisualAssetsComponent;AppXCapabilitiesComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;FixupComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
+  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_APP_FILE" Value="[#main_tkinter.exe]"/>
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
@@ -49,7 +52,7 @@
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
-    <ROW File="main_tkinter.exe" Component_="main_tkinter.exe" FileName="LASERA~1.EXE|LaserAssistant.exe" Attributes="0" SourcePath="dist\LaserAssistant.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="main_tkinter.exe" Component_="main_tkinter.exe" FileName="MAIN_T~1.EXE|main_tkinter.exe" Attributes="0" SourcePath="dist\main_tkinter.exe" SelfReg="false" DigSign="true"/>
     <ROW File="FileIcon.ico" Component_="FileIcon.ico" FileName="FileIcon.ico" Attributes="0" SourcePath="dist\FileIcon.ico" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">

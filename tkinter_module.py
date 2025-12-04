@@ -5,6 +5,7 @@ from PDF_module import PdfSearcher
 from pdf_taf_checker import ComparePdfTaf
 import os, sys
 from sys import exit # Using this instead of typical exit because the program is run from a pyinstaller exe
+import re
 
 # This function checks if an input if just a single number. If it is it adds a leading 0
 def check_for_single_number(input_number):
@@ -438,56 +439,79 @@ class FileUpdaterGUI:
         self.display_comparison_results(comparison_results)
 
     def display_comparison_results(self, results):
-        """Creates a list of results in the results_frame. This will display the results of the PDF-TAF comparison.
-        The results are color coded. RED is for different revisions, GREEN is for matching revisions, and ORANGE is for missing revisions."""
-        
-        # Function to look up the color based on the GEO State
-        def get_color_based_on_geo_state(geo_state):
-            # Iterate through each regex pattern in the dictionary
-            for pattern, color in geo_state_colors.items():
-                if re.search(pattern, geo_state):
-                    return color  # Return the color if the regex matches the geo_state
-            return 'white'  # Default color if no pattern matches
-        
-        # Clear previous results in the results frame's results display
-        for widget in self.results_frame.winfo_children():
-            widget.destroy()
-            
-        # Define a color map for text color based on GEO State
+        """Show the PDF-vs-TAF comparison, sorted A-Z / 0-9 by part number."""
+
+        # ---------- 1. natural-sort the incoming results -----------------
+        def natural_key(text):
+            """Split text into ints and strings for natural A-Z / 0-9 ordering."""
+            return [int(tok) if tok.isdigit() else tok.lower()
+                    for tok in re.split(r'(\d+)', text)]
+
+        results = sorted(results, key=lambda r: natural_key(r[0]))  # r[0] = part_number
+        # -----------------------------------------------------------------
+
+        # ---------- 2. colour map / helper (unchanged) -------------------
         geo_state_colors = {
             'GEO missing revision': 'purple',
-            'No GEO found': 'purple',
-            r'Newer GEO.*': 'blue',
+            'No GEO found':         'purple',
+            r'Newer GEO.*':         'blue',
             r'Latest GEO revision is.*': 'blue',
             r'Program contains latest.*': 'white',
         }
 
-        # Iterate over all result tuples and create a color coded label for each
-        for result in results:
-            part_number, match, taf_before_underscore, pdf_before_underscore, taf_after_underscore, pdf_after_underscore, geo_state = result[0], result[1], result[2], result[3], result[4], result[5], result[6] # Unpack the result tuple
-            
-            # Check if the parts match and revisions are present
-            if match and taf_after_underscore != "Missing Revision" and pdf_after_underscore != "Missing Revision":
-                bg_color = "green"
-                text = f"{part_number}\nRevision: {pdf_after_underscore}\nGEO State: {geo_state}"
-            # Check if the parts match but revisions are missing
-            elif match and taf_after_underscore == "Missing Revision" and pdf_after_underscore == "Missing Revision":
-                bg_color = "orange"
-                text = f"{part_number}\nTAF & PDF Missing Revision\nGEO State: {geo_state}"
-            # Parts dont have same revisions
+        def get_color_based_on_geo_state(geo_state):
+            for pattern, color in geo_state_colors.items():
+                if re.search(pattern, geo_state):
+                    return color
+            return 'white'
+        # -----------------------------------------------------------------
+
+        # ---------- 3. clear previous widgets ----------------------------
+        for widget in self.results_frame.winfo_children():
+            widget.destroy()
+        # -----------------------------------------------------------------
+
+        # ---------- 4. build the new, sorted display ---------------------
+        for (part_number, match,
+            taf_before_underscore, pdf_before_underscore,
+            taf_after_underscore, pdf_after_underscore,
+            geo_state) in results:
+
+            if (match
+                and taf_after_underscore != "Missing Revision"
+                and pdf_after_underscore != "Missing Revision"):
+                bg_color = 'green'
+                text = (f"{part_number}\n"
+                        f"Revision: {pdf_after_underscore}\n"
+                        f"GEO State: {geo_state}")
+
+            elif (match
+                and taf_after_underscore == "Missing Revision"
+                and pdf_after_underscore == "Missing Revision"):
+                bg_color = 'orange'
+                text = (f"{part_number}\n"
+                        f"TAF & PDF Missing Revision\n"
+                        f"GEO State: {geo_state}")
+
             else:
-                bg_color = "red"
-                
-                # Different formats depending on what issue there is
+                bg_color = 'red'
                 if pdf_before_underscore == "Part not found":
-                    text = f"{part_number}\nPDF: {pdf_before_underscore}, TAF: {taf_before_underscore}_{taf_after_underscore}\nGEO State: {geo_state}"
-                elif result[2] != "Missing TAF":
-                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}_{taf_after_underscore}\nGEO State: {geo_state}"
+                    text = (f"{part_number}\n"
+                            f"PDF: {pdf_before_underscore}, "
+                            f"TAF: {taf_before_underscore}_{taf_after_underscore}\n"
+                            f"GEO State: {geo_state}")
+                elif taf_after_underscore != "Missing TAF":
+                    text = (f"{part_number}\n"
+                            f"PDF: {pdf_before_underscore}_{pdf_after_underscore}, "
+                            f"TAF: {taf_before_underscore}_{taf_after_underscore}\n"
+                            f"GEO State: {geo_state}")
                 else:
-                    text = f"{part_number}\nPDF: {pdf_before_underscore}_{pdf_after_underscore}, TAF: {taf_before_underscore}\nGEO State: {geo_state}"
-            
-            print(f"GEOSTATE: {geo_state}")
-            fg_color = get_color_based_on_geo_state(geo_state)  # Default to black if state is not in the map
-            print(f"FGCOL: {fg_color}")
-            label = tk.Label(self.results_frame, text=text, bg=bg_color, fg=fg_color, padx=15, pady=5) # Create the label with the text and color
-            label.pack(fill="both", padx=5, pady=5)
+                    text = (f"{part_number}\n"
+                            f"PDF: {pdf_before_underscore}_{pdf_after_underscore}, "
+                            f"TAF: {taf_before_underscore}\n"
+                            f"GEO State: {geo_state}")
+
+            fg_color = get_color_based_on_geo_state(geo_state)
+            tk.Label(self.results_frame, text=text,
+                    bg=bg_color, fg=fg_color,
+                    padx=15, pady=5).pack(fill='both', padx=5, pady=5)
